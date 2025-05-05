@@ -163,7 +163,7 @@ def get_description(soup):
         if target_div:
             text_data = target_div.get_text(separator='\n', strip=True)
             result = ''.join(line.strip() for line in text_data.split('\n') if line.strip())
-
+            result = result.replace('-\t', '<br>- ')
             printer(f"{result=}", kind='info')
         else:
             printer("[get_description] Не удалось найти указанный div с атрибутом data-id='content'.", kind='error')
