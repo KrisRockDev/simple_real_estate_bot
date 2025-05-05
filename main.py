@@ -1,13 +1,9 @@
 import re
 import os
 import logging
-import asyncio
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
-from settings import cookies, headers
-from parser_cian.parser import parse_cian
-
 
 # Настраиваем логирование
 logging.basicConfig(level=logging.INFO)

@@ -1,0 +1,1 @@
+<div data-name="OfferTitleNew" class="a10a3f92e9--container--pWxZo"><h1 class="a10a3f92e9--title--vlZwT">Продается 3-комн. квартира, 86,2 м²</h1><div data-name="ParentNew" class="a10a3f92e9--container--mTzLi">в<!-- -->&nbsp;<a class="a10a3f92e9--link--A5SdC" href="https://zhk-novye-smysly-i.cian.ru/" target="_blank" rel="noopener noreferrer">ЖК «Новые Смыслы»</a></div></div>

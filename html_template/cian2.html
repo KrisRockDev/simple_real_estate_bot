@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ru"> <!-- Установлен русский язык -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Предложение недвижимости | Виктория</title> <!-- Более информативный title -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Пользовательские стили -->
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Более стандартный системный шрифт */
+            background-color: #f8f9fa; /* Очень светлый фон для чистоты */
+            color: #212529; /* Стандартный темный цвет текста */
+        }
+        .container {
+            max-width: 960px; /* Ограничиваем ширину для лучшей читаемости на больших экранах */
+            background-color: #ffffff; /* Белый фон для основного контента */
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05); /* Легкая тень для выделения */
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 0.3rem; /* Небольшое скругление углов */
+        }
+        h1, .h1 {
+            font-weight: 300; /* Более легкий основной заголовок */
+            margin-bottom: 0.5rem;
+        }
+        .price-main {
+            font-size: 2.5rem; /* Крупная цена */
+            font-weight: 500; /* Средняя насыщенность */
+            color: #000; /* Черный цвет для акцента на цене */
+        }
+        .address {
+            font-size: 1.1rem;
+            color: #6c757d; /* text-muted */
+            margin-bottom: 1rem;
+        }
+        .metro-list span {
+            display: inline-block; /* Чтобы отступы работали */
+            margin-right: 1.5rem; /* Отступ между станциями метро */
+            margin-bottom: 0.5rem; /* Отступ снизу для переносов */
+            color: #6c757d;
+        }
+        .metro-list .bi { /* Стиль иконки метро */
+            color: #198754; /* Зеленый цвет (Bootstrap success) */
+            margin-right: 0.3rem;
+            vertical-align: middle; /* Выравнивание иконки */
+        }
+        .section-title {
+            font-weight: 500;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6; /* Тонкая линия под заголовком секции */
+        }
+        .detail-item {
+            margin-bottom: 1rem; /* Отступ между параметрами */
+        }
+        .detail-item .label {
+            display: block;
+            font-size: 0.85rem;
+            color: #6c757d; /* text-muted */
+            margin-bottom: 0.1rem;
+        }
+        .detail-item .value {
+            font-size: 1rem;
+            font-weight: 500; /* Значения делаем чуть жирнее */
+        }
+        .description-text {
+            line-height: 1.7; /* Увеличенный межстрочный интервал для описания */
+            color: #495057;
+            margin-top: 1rem;
+        }
+        .contact-header {
+            text-align: right;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+             font-size: 0.9rem;
+             color: #6c757d;
+        }
+         .photo-gallery img {
+            border-radius: 0.25rem; /* Небольшое скругление у фото */
+            margin-bottom: 1.5rem; /* Отступ под фото в галерее */
+         }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Шапка с контактами -->
+    <div class="contact-header">
+        Риелтор Виктория | <a href="tel:+79097195878" class="text-decoration-none text-dark fw-bold">+7 (909) 719-58-78</a>
+    </div>
+
+    <!-- Основная информация: Название, Адрес, Цена -->
+    <div class="row mb-4 align-items-start"> <!-- Выравнивание по верху -->
+        <div class="col-md-8">
+            <h1 class="h1">НАЗВАНИЕ</h1>
+            <div class="address">АДРЕС</div>
+            <div class="metro-list">МЕТРО</div> <!-- Сюда будет подставлен HTML для метро -->
+        </div>
+        <div class="col-md-4 text-md-end"> <!-- Выравнивание по правому краю на средних и больших экранах -->
+            <div class="price-main mb-1">СТОИМОСТЬ</div>
+            <div class="text-muted mb-2">ЦЕНА_ЗА_МЕТР</div>
+            <div class="small text-muted">УСЛОВИЯ_СДЕЛКИ</div>
+            <div class="small text-muted">Ипотека: ИПОТЕКА</div>
+            <!-- <div class="small text-muted">Тип жилья: ТИП_ЖИЛЬЯ</div> --> <!-- Можно убрать, если есть в параметрах ниже -->
+        </div>
+    </div>
+
+    <!-- Галерея Фотографий -->
+    <div class="row photo-gallery mt-4 mb-3">
+        ФОТОГРАФИИ <!-- Сюда будет подставлен HTML для фото (ожидается <div class="col-...">...</div>) -->
+    </div>
+
+    <!-- Детали Квартиры -->
+    <h4 class="section-title">О квартире</h4>
+    <div class="row">
+        <div class="col-6 col-md-4 col-lg-2 detail-item">
+            <span class="label">Год постройки</span>
+            <span class="value">ГОД_ПОСТРОЙКИ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2 detail-item">
+            <span class="label">Общая площадь</span>
+            <span class="value">ОБЩАЯ_ПЛОЩАДЬ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2 detail-item">
+            <span class="label">Жилая площадь</span>
+            <span class="value">ЖИЛАЯ_ПЛОЩАДЬ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2 detail-item">
+            <span class="label">Площадь кухни</span>
+            <span class="value">ПЛОЩАДЬ_КУХНИ</span>
+        </div>
+         <div class="col-6 col-md-4 col-lg-2 detail-item">
+            <span class="label">Высота потолков</span>
+            <span class="value">ВЫСОТА_ПОТОЛКОВ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2 detail-item">
+            <span class="label">Этаж</span>
+            <span class="value">FLOR из ЭТАЖНОСТЬ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2 detail-item">
+            <span class="label">Отделка/Ремонт</span>
+            <span class="value">РЕМОНТ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2 detail-item">
+            <span class="label">Санузел</span>
+            <span class="value">САНУЗЕЛ</span>
+        </div>
+         <div class="col-6 col-md-4 col-lg-2 detail-item">
+            <span class="label">Вид из окон</span>
+            <span class="value">ВИД_ИЗ_ОКОН</span>
+        </div>
+         <!-- Добавьте другие параметры квартиры сюда, если нужно -->
+    </div>
+
+    <!-- Детали Дома -->
+    <h4 class="section-title">О доме</h4>
+    <div class="row">
+        <div class="col-6 col-md-4 col-lg-3 detail-item">
+            <span class="label">Тип дома</span>
+            <span class="value">ТИП_ДОМА</span>
+        </div>
+         <div class="col-6 col-md-4 col-lg-3 detail-item">
+            <span class="label">Тип перекрытий</span>
+            <span class="value">ТИП_ПЕРЕКРЫТИЙ</span>
+        </div>
+         <div class="col-6 col-md-4 col-lg-3 detail-item">
+            <span class="label">Строительная серия</span>
+            <span class="value">СТРОИТЕЛЬНАЯ_СЕРИЯ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3 detail-item">
+            <span class="label">Лифт</span>
+            <span class="value">КОЛИЧЕСТВО_ЛИФТОВ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3 detail-item">
+            <span class="label">Подъезды</span>
+            <span class="value">ПОДЪЕЗДЫ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3 detail-item">
+            <span class="label">Парковка</span>
+            <span class="value">ПАРКОВКА</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3 detail-item">
+            <span class="label">Отопление</span>
+            <span class="value">ОТОПЛЕНИЕ</span>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3 detail-item">
+            <span class="label">Аварийность</span>
+            <span class="value">АВРИЙНОСТЬ</span>
+        </div>
+         <!-- Добавьте другие параметры дома сюда, если нужно -->
+    </div>
+
+    <!-- Описание -->
+    <h4 class="section-title">Описание</h4>
+    <div class="description-text">
+        ОПИСАНИЕ <!-- Сюда будет подставлен текст описания с <br> -->
+    </div>
+
+    <!-- Подвал (можно добавить контакты еще раз или другую информацию) -->
+    <hr class="mt-5">
+    <div class="text-center text-muted small mt-3">
+        Информация предоставлена риелтором Викторией | +7 (909) 719-58-78
+        <br>
+        <!-- Дата генерации отчета (если возможно добавить) -->
+        <!-- Отчет сгенерирован: ДАТА_ГЕНЕРАЦИИ -->
+    </div>
+
+</div> <!-- /container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>

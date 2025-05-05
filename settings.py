@@ -46,6 +46,7 @@ dirs = [
     downloads_dir := 'downloads',  # директория для скачивания
     users_dir := 'users',  # директория с пользователями
     log_dir := 'logs',  # директория для логов
+    templates := 'html_template',
 ]
 
 # директория с пользователями
@@ -60,6 +61,10 @@ os.makedirs(downloads_dir_absolute, exist_ok=True)
 # директория для логов
 log_dir_absolute = os.path.abspath(log_dir)
 os.makedirs(log_dir_absolute, exist_ok=True)
+
+
+templates_dir_absolute = os.path.abspath(templates)
+os.makedirs(templates_dir_absolute, exist_ok=True)
 
 # Количество фильмов сохраняемх в папке base_dir (не рекомендуется менее 10 и более 100)
 limit = 10

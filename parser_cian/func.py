@@ -6,6 +6,44 @@ from settings import downloads_dir_absolute
 from servise import printer
 
 
+def get_title(soup):
+    """
+    Извлекает полный заголовок объявления (включая название ЖК, если есть)
+    из контейнера с data-name='OfferTitleNew'.
+    Использует get_text() для получения всего текста и последующую очистку.
+    """
+    try:
+        # 1. Находим основной контейнер заголовка
+        title_container = soup.find('div', {'data-name': 'OfferTitleNew'})
+        # ic(title_container) # Оставляем для отладки
+
+        if not title_container:
+            printer("Контейнер заголовка (data-name='OfferTitleNew') не найден.", kind='warning')
+            return None
+
+        # 2. Извлекаем весь текст из найденного контейнера.
+        #    separator=' ' добавляет пробел между текстовыми блоками (например, между h1 и div с ЖК).
+        #    strip=True удаляет лишние пробелы/переносы строк по краям каждого отдельного текстового узла.
+        full_text = title_container.get_text(separator=' ', strip=True)
+        # Пример результата на этом этапе: "Продается 3-комн. квартира, 86,2 м² в ЖК «Новые Смыслы»"
+        # (могут быть лишние пробелы или \xa0 в зависимости от HTML)
+
+        # 3. Очищаем извлеченный текст:
+        #    - Заменяем неразрывные пробелы (\xa0 или  ) на обычные пробелы.
+        #    - Убираем лишние пробелы (если их несколько подряд) и пробелы по краям строки.
+        cleaned_text = full_text.replace('\xa0', ' ').replace('&nbsp;', ' ').replace(' ', ' ')
+        # Используем ' '.join(cleaned_text.split()) - это Pythonic способ
+        # заменить любые последовательности пробельных символов одним пробелом
+        # и убрать пробелы по краям. Эквивалентно re.sub(r'\s+', ' ', cleaned_text).strip()
+        cleaned_text = ' '.join(cleaned_text.split())
+
+        # printer(f"[Заголовок] {cleaned_text}", kind='info') # Раскомментируйте, если нужно логировать успешный результат
+        return cleaned_text
+
+    except Exception as _ex:
+        printer(f'error_get_title: Произошла ошибка при извлечении заголовка: {_ex}', kind='error')
+        return None
+
 def get_adress(soup):
     try:
         # Находим блок с атрибутом data-name="AddressContainer"
@@ -175,4 +213,4 @@ def get_imgages(soup, cian_number):
     except Exception as _ex:
         printer(f'error_get_imgages: {_ex}', kind='error')
 
-    return {'images': img_list}
+    return img_list
