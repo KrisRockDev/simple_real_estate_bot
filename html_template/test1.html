@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Предложение недвижимости | Риелтор ИМЯ_РЕЕЛТОРА</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap CSS УДАЛЕН -->
+
+    <style>
+        /* Базовые сбросы и настройки */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
+
+        body {
+            font-family: inherit; /* Наследуем от html */
+            line-height: inherit; /* Наследуем от html */
+            color: #212529;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 960px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        /* Стили для таблиц верстки (без границ) */
+        table.layout-table, /* Добавим класс для таблиц, используемых для верстки */
+        table.layout-table td,
+        table.layout-table th {
+            border: none !important;
+        }
+        table.layout-table {
+             width: 100%;
+             border-collapse: collapse;
+             border-spacing: 0;
+        }
+        table.layout-table td,
+        table.layout-table th {
+            padding: 0;
+            vertical-align: top;
+        }
+
+
+        /* Типографика */
+        h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            font-weight: 500; /* Bootstrap default weight for headings */
+            line-height: 1.2;
+        }
+
+        h1, .h1 { font-size: 2rem; font-weight: 300; /* Как было в кастомных */ } /* Размер как в Bootstrap 2.5rem, но здесь оставим кастомный */
+        h4, .h4 { font-size: 1.1rem; /* Размер как в .section-title, Bootstrap h4 is 1.5rem */ }
+
+        a {
+            color: #0d6efd; /* Bootstrap primary color */
+            text-decoration: underline;
+        }
+        a:hover {
+            color: #0a58ca;
+        }
+
+        /* Вспомогательные классы, имитирующие Bootstrap */
+        .text-decoration-none { text-decoration: none !important; }
+        .text-dark { color: #212529 !important; } /* #1f2326 Bootstrap's $gray-900, но #212529 уже используется */
+        .fw-bold { font-weight: 700 !important; } /* Bootstrap's $font-weight-bold */
+        .text-muted { color: #6c757d !important; }
+        .small { font-size: .875em; }
+        .text-center { text-align: center !important; }
+
+
+        /* Стили из оригинального шаблона */
+        .price-main {
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: #000; /* Отличается от text-dark, оставляем */
+        }
+        .address {
+            font-size: 1rem;
+            color: #6c757d; /* совпадает с text-muted */
+            margin-bottom: 0.8rem;
+        }
+        .metro-list {
+             line-height: 1.6;
+        }
+        .metro-list span {
+            display: inline-block;
+            margin-right: 1rem;
+        }
+        .metro-list .bi { /* Bootstrap Icons стилизуются своим CSS, но цвет можно переопределить */
+            color: #198754; /* Bootstrap success color */
+            margin-right: 0.3rem;
+            vertical-align: baseline;
+        }
+        .section-title {
+            font-weight: 500;
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.3rem;
+            border: none;
+            border-bottom: 1px solid #dee2e6; /* Bootstrap $gray-300 */
+        }
+        .detail-item {
+            margin-bottom: 0.8rem;
+            /* padding-right для ячеек лучше задавать инлайн или через :not(:last-child) если нужно */
+        }
+        .detail-item .label {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c757d; /* совпадает с text-muted */
+            margin-bottom: 0;
+        }
+        .detail-item .value {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .year-accanto-title .label {
+             font-size: 0.8rem;
+             color: #6c757d; /* совпадает с text-muted */
+        }
+        .year-accanto-title .value {
+             font-size: 0.9rem;
+             font-weight: 500;
+        }
+        .description-text {
+            line-height: 1.6;
+            color: #343a40; /* Bootstrap $gray-700 */
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .contact-header {
+            text-align: right;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            border: none;
+            border-bottom: 1px solid #eee; /* Близок к Bootstrap $gray-200 */
+            font-size: 0.85rem;
+            color: #6c757d; /* совпадает с text-muted */
+        }
+         .photo-gallery img {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 1rem;
+         }
+         hr {
+             margin-top: 1.5rem;
+             margin-bottom: 0.8rem;
+             border: 0;
+             border-top: 1px solid #dee2e6; /* Bootstrap $gray-300 */
+             height: 0;
+         }
+         .footer-contact {
+             font-size: 0.8rem;
+             /* text-muted и text-center будут применены через классы */
+         }
+
+        /* Стили для таблицы с данными (например, таблица фильмов) */
+        .data-table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+            vertical-align: top;
+            border-collapse: collapse; /* Убедимся, что здесь тоже collapse */
+        }
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem; /* Bootstrap-like padding */
+            vertical-align: middle; /* Обычно для данных лучше middle */
+            border-bottom: 1px solid #dee2e6; /* Bootstrap-like border */
+        }
+        .data-table thead th {
+            vertical-align: bottom;
+            border-bottom-width: 2px; /* Более жирная линия под заголовками */
+            text-align: left; /* По умолчанию для th */
+            font-weight: 700; /* Делаем заголовки жирными */
+        }
+        .data-table tbody tr:first-child th,
+        .data-table tbody tr:first-child td {
+             border-top: 1px solid #dee2e6; /* Линия над первой строкой данных */
+        }
+        /* Для "зебры", если нужно, как у .table-striped */
+        /*
+        .data-table tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        */
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Шапка с контактами -->
+    <div class="contact-header">
+        Риелтор ИМЯ_РЕЕЛТОРА | <a href="tel:ТЕЛЕФОН_РИЕЛТОРА" class="text-decoration-none text-dark fw-bold">ТЕЛЕФОН_РИЕЛТОРА</a>
+    </div>
+
+    <!-- Основная информация: Название, Адрес, Цена -->
+    <table class="layout-table" style="margin-bottom: 0.8rem;">
+        <tr>
+            <td style="width: 75%; vertical-align: top; padding-right: 15px;"> <!-- Добавил padding-right для отступа между колонками -->
+                <h1 class="h1">НАЗВАНИЕ</h1>
+                <div class="address">АДРЕС</div>
+                <div class="metro-list">МЕТРО <!-- <i class="bi bi-train-front"></i> Пример, если иконка тут нужна --></div>
+            </td>
+            <td style="width: 25%; text-align: right; vertical-align: top;">
+                <div class="price-main" style="margin-bottom: 0.25rem;">СТОИМОСТЬ</div>
+                <div class="text-muted small" style="margin-bottom: 0.25rem;">ЦЕНА_ЗА_МЕТР</div>
+                <div class="small text-muted">УСЛОВИЯ_СДЕЛКИ</div>
+                <div class="small text-muted">Ипотека: ИПОТЕКА</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Галерея Фотографий -->
+    <table class="layout-table photo-gallery" style="margin-top: 1rem; margin-bottom: 0.5rem;">
+         <tr>
+            <td>ФОТОГРАФИИ <!-- Ожидается <img src="..." alt="..."> или несколько <td> с <img> --></td>
+         </tr>
+    </table>
+
+
+    <!-- Детали Квартиры -->
+    <h4 class="section-title">О квартире</h4>
+    <table class="layout-table">
+        <tr>
+            <td style="width: 25%; padding-right: 10px;" class="detail-item">
+                <span class="label">Общая площадь</span>
+                <span class="value">ОБЩАЯ_ПЛОЩАДЬ</span>
+            </td>
+            <td style="width: 25%; padding-left: 5px; padding-right: 10px;" class="detail-item">
+                <span class="label">Жилая площадь</span>
+                <span class="value">ЖИЛАЯ_ПЛОЩАДЬ</span>
+            </td>
+            <td style="width: 25%; padding-left: 5px; padding-right: 10px;" class="detail-item">
+                <span class="label">Площадь кухни</span>
+                <span class="value">ПЛОЩАДЬ_КУХНИ</span>
+            </td>
+            <td style="width: 25%; padding-left: 5px;" class="detail-item">
+                <span class="label">Высота потолков</span>
+                <span class="value">ВЫСОТА_ПОТОЛКОВ</span>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-right: 10px;" class="detail-item">
+                <span class="label">Этаж</span>
+                <span class="value">FLOR из ЭТАЖНОСТЬ</span>
+            </td>
+            <td style="padding-left: 5px; padding-right: 10px;" class="detail-item">
+                <span class="label">Отделка/Ремонт</span>
+                <span class="value">РЕМОНТ</span>
+            </td>
+            <td style="padding-left: 5px; padding-right: 10px;" class="detail-item">
+                <span class="label">Санузел</span>
+                <span class="value">САНУЗЕЛ</span>
+            </td>
+            <td style="padding-left: 5px;" class="detail-item">
+                <span class="label">Вид из окон</span>
+                <span class="value">ВИД_ИЗ_ОКОН</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Детали Дома -->
+    <table class="layout-table" style="margin-top: 1rem; vertical-align: middle;">
+        <tr>
+            <td>
+                <h4 class="section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none !important;">О доме</h4>
+            </td>
+            <td style="text-align: right;" class="year-accanto-title">
+                 <span class="label" style="display: inline; margin-right: 0.25rem;">Год постройки:</span>
+                 <span class="value" style="display: inline;">ГОД_ПОСТРОЙКИ</span>
+            </td>
+        </tr>
+    </table>
+    <hr style="margin-top: 0.25rem; margin-bottom: 1rem;">
+
+    <!-- Параметры дома -->
+    <table class="layout-table">
+        <tr>
+            <td style="width: 25%; padding-right: 10px;" class="detail-item">
+                <span class="label">Тип дома</span>
+                <span class="value">ТИП_ДОМА</span>
+            </td>
+            <td style="width: 25%; padding-left: 5px; padding-right: 10px;" class="detail-item">
+                <span class="label">Тип перекрытий</span>
+                <span class="value">ТИП_ПЕРЕКРЫТИЙ</span>
+            </td>
+            <td style="width: 25%; padding-left: 5px; padding-right: 10px;" class="detail-item">
+                <span class="label">Строительная серия</span>
+                <span class="value">СТРОИТЕЛЬНАЯ_СЕРИЯ</span>
+            </td>
+            <td style="width: 25%; padding-left: 5px;" class="detail-item">
+                <span class="label">Лифт</span>
+                <span class="value">КОЛИЧЕСТВО_ЛИФТОВ</span>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-right: 10px;" class="detail-item">
+                <span class="label">Подъезды</span>
+                <span class="value">ПОДЪЕЗДЫ</span>
+            </td>
+            <td style="padding-left: 5px; padding-right: 10px;" class="detail-item">
+                <span class="label">Парковка</span>
+                <span class="value">ПАРКОВКА</span>
+            </td>
+            <td style="padding-left: 5px; padding-right: 10px;" class="detail-item">
+                <span class="label">Отопление</span>
+                <span class="value">ОТОПЛЕНИЕ</span>
+            </td>
+            <td style="padding-left: 5px;" class="detail-item">
+                <span class="label">Аварийность</span>
+                <span class="value">АВРИЙНОСТЬ</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Описание -->
+    <h4 class="section-title">Описание</h4>
+    <div class="description-text">
+        ОПИСАНИЕ <!-- Ожидается текст с <br> -->
+    </div>
+
+    <!-- Подвал -->
+    <hr>
+    <div class="text-center text-muted footer-contact" style="margin-top: 0.5rem; padding-bottom: 1rem;">
+        Риелтор ИМЯ_РЕЕЛТОРА | <a href="tel:ТЕЛЕФОН_РИЕЛТОРА" class="text-decoration-none text-dark fw-bold">ТЕЛЕФОН_РИЕЛТОРА</a>
+    </div>
+
+</div> <!-- /container -->
+
+<!-- Bootstrap JS необязателен для статичного PDF, но не мешает (оставил) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>

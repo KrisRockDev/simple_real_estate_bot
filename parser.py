@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from servise import printer
 from settings import cookies, headers
 from create_cian import create_report_cian
+from PDF_creater import converter
 
 
 def parse_cian(URL, cookies, headers):
@@ -23,8 +24,8 @@ def parse_cian(URL, cookies, headers):
     if status_code == 200:
         # Используем BeautifulSoup для парсинга HTML-кода страницы
         soup = BeautifulSoup(response.text, "html.parser")
-        with open(file='page.html', mode='w', encoding='utf8') as file:
-            file.write(str(soup))
+        # with open(file='page.html', mode='w', encoding='utf8') as file:
+        #     file.write(str(soup))
         # with open(file='page.html', mode='r', encoding='utf8') as file:
         #     html = file.read()
         # soup = BeautifulSoup(html, 'html.parser')
@@ -56,7 +57,8 @@ if __name__ == '__main__':
 
     for URL in URLs:
         result, cian_number = parse_cian(URL, cookies, headers)
-        create_report_cian(result, cian_number)
+        output_path = create_report_cian(result, cian_number)
+        converter(DIRECTORY=output_path)
 
     print('\nПрограмма завершила работу')
     # time.sleep(5)

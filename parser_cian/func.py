@@ -197,7 +197,7 @@ def save_image(image_directory, img_url, number):
 def get_imgages(soup, cian_number):
     # Создадим директорию для сохранения изображений
     image_directory = os.path.join(downloads_dir_absolute, cian_number)
-    ic(image_directory)
+    # ic(image_directory)
     os.makedirs(image_directory, exist_ok=True)
     img_list = []
 

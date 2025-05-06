@@ -16,6 +16,7 @@ icecream==2.1.4
 idna==3.10
 magic-filter==1.0.12
 multidict==6.2.0
+pdfkit==1.0.0
 propcache==0.3.0
 pydantic==2.10.6
 pydantic_core==2.27.2

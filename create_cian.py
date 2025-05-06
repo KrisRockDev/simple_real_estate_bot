@@ -1,7 +1,8 @@
 import os
 import re  # Для очистки описания от лишних пробелов и замены переносов строк
 from settings import templates_dir_absolute, downloads_dir_absolute
-import locale
+from dotenv import load_dotenv
+load_dotenv()
 
 
 def format_price(price_string):
@@ -29,7 +30,7 @@ def format_price(price_string):
         # 1. Отделяем символ валюты, если он есть
         if price_string.endswith(currency_symbol):
             numeric_part = price_string[:-len(currency_symbol)]
-            symbol_to_append = currency_symbol
+            symbol_to_append = ' '+ currency_symbol
         else:
             # Если символа нет, форматируем как есть, символ не добавляем
             symbol_to_append = ''
@@ -67,7 +68,7 @@ def create_report_cian(res, cian_number):
     Args:
         res (dict): Словарь с данными для заполнения шаблона.
     """
-    tempfile_path = os.path.join(templates_dir_absolute, 'cian.html')
+    tempfile_path = os.path.join(templates_dir_absolute, 'cian6.html')
     output_filename = 'index.html'  # Имя выходного файла
     output_path = os.path.join(os.path.join(downloads_dir_absolute, cian_number), output_filename)
 
@@ -110,10 +111,9 @@ def create_report_cian(res, cian_number):
                     # или потребует относительных/абсолютных URL веб-сервера.
                     img_src = f"file:///{img_path.replace(os.sep, '/')}"  # Преобразуем путь для URL
                     images_html += f'''
-                    <div class="col-md-4 mb-3">
-                        <img src="{img_src}" class="img-fluid" alt="Фото {i + 1}">
-                    </div>'''
-                images_html += '</div>'  # Закрываем .row
+                            <td style="padding: 0.5rem; text-align: center;">
+                              <img src="{img_src}" style="width:280px;" alt="Фото {i + 1}">
+                            </td>'''
         else:
             images_html = '<p>Фотографии отсутствуют.</p>'
 
@@ -137,13 +137,15 @@ def create_report_cian(res, cian_number):
         # --- Список замен ---
         # Используем .get() для предотвращения KeyError, если ключ отсутствует
         replace_list = [
+            ('ИМЯ_РЕЕЛТОРА', os.getenv("NAME")),
+            ('ТЕЛЕФОН_РИЕЛТОРА', os.getenv("PHONE")),
             ('НАЗВАНИЕ', res.get('title', 'Без названия')),
             ('АДРЕС', res.get('adress', 'Адрес не указан')),
             ('СТОИМОСТЬ', format_price(res.get('price', 'Цена не указана'))),
             ('МЕТРО', metro_html),  # Подставляем сгенерированный HTML для метро
             ('ЦЕНА_ЗА_МЕТР', offer.get('Цена за метр', 'Не указано')),
             # Пытаемся взять "Условия сделки", иначе проверяем "Дом"
-            ('УСЛОВИЯ_СДЕЛКИ', offer.get('Условия сделки', params.get('Дом', 'Не указано'))),
+            ('УСЛОВИЯ_СДЕЛКИ', offer.get('Условия сделки', params.get('Дом', 'Не указано')).capitalize()),
             ('ИПОТЕКА', offer.get('Ипотека', 'Не указано')),
             ('ТИП_ЖИЛЬЯ', 'Квартира'),  # Пример, т.к. нет в res. Можно сделать сложнее, если надо
             ('ФОТОГРАФИИ', images_html),  # Подставляем сгенерированный HTML для фото
@@ -159,7 +161,7 @@ def create_report_cian(res, cian_number):
             ('САНУЗЕЛ', params.get('Санузел', 'Не указано')),  # Добавлено
             ('КОЛИЧЕСТВО_ЛИФТОВ', params.get('Лифт', 'Не указано')),  # Добавлено (ищем ключ "Лифт")
             ('ПАРКОВКА', params.get('Парковка', 'Не указано')),  # Добавлено
-            ('АВРИЙНОСТЬ', params.get('Аварийность', 'Нет данных')),  # Добавлено (исправлена опечатка)
+            ('АВАРИЙНОСТЬ', params.get('Аварийность', 'Нет данных')),  # Добавлено (исправлена опечатка)
             ('РЕМОНТ', params.get('Отделка', 'Не указано')),  # Используем "Отделка"
             ('СТРОИТЕЛЬНАЯ_СЕРИЯ', params.get('Строй. серия', 'Не указана')),  # Добавлено
             ('ОТОПЛЕНИЕ', params.get('Отопление', 'Центральное')),  # Добавлено (можно указать дефолт)
@@ -179,6 +181,8 @@ def create_report_cian(res, cian_number):
         with open(file=output_path, mode='w', encoding='utf8') as f:
             f.write(template)
         print(f"Отчет успешно создан и сохранен в: {output_path}")  # Добавим сообщение об успехе
+
+        return output_path
 
     except FileNotFoundError:
         print(f"Ошибка: Шаблон не найден по пути {tempfile_path}")
