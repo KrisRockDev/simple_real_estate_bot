@@ -10,6 +10,7 @@ from PDF_creater import converter
 
 
 def parse_cian(URL, cookies, headers):
+    print()
     printer(f'Обрабатываем страницу {URL}', kind='info')
     cian_number = URL.rstrip('/').split('/')[-1]
     # print(f"{cian_number=}")

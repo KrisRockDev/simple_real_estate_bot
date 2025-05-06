@@ -48,11 +48,13 @@
         table.layout-table th {
             border: none !important;
         }
+
         table.layout-table {
-             width: 100%;
-             border-collapse: collapse;
-             border-spacing: 0;
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
         }
+
         table.layout-table td,
         table.layout-table th {
             padding: 0;
@@ -68,24 +70,51 @@
             line-height: 1.2;
         }
 
-        h1, .h1 { font-size: 2rem; font-weight: 300; /* Как было в кастомных */ } /* Размер как в Bootstrap 2.5rem, но здесь оставим кастомный */
-        h4, .h4 { font-size: 1.1rem; /* Размер как в .section-title, Bootstrap h4 is 1.5rem */ }
+        h1, .h1 {
+            font-size: 2rem;
+            font-weight: 300; /* Как было в кастомных */
+        }
+
+        /* Размер как в Bootstrap 2.5rem, но здесь оставим кастомный */
+        h4, .h4 {
+            font-size: 1.1rem; /* Размер как в .section-title, Bootstrap h4 is 1.5rem */
+        }
 
         a {
             color: #0d6efd; /* Bootstrap primary color */
             text-decoration: underline;
         }
+
         a:hover {
             color: #0a58ca;
         }
 
         /* Вспомогательные классы, имитирующие Bootstrap */
-        .text-decoration-none { text-decoration: none !important; }
-        .text-dark { color: #212529 !important; } /* #1f2326 Bootstrap's $gray-900, но #212529 уже используется */
-        .fw-bold { font-weight: 700 !important; } /* Bootstrap's $font-weight-bold */
-        .text-muted { color: #6c757d !important; }
-        .small { font-size: .75em; }
-        .text-center { text-align: center !important; }
+        .text-decoration-none {
+            text-decoration: none !important;
+        }
+
+        .text-dark {
+            color: #212529 !important;
+        }
+
+        /* #1f2326 Bootstrap's $gray-900, но #212529 уже используется */
+        .fw-bold {
+            font-weight: 700 !important;
+        }
+
+        /* Bootstrap's $font-weight-bold */
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        .small {
+            font-size: .75em;
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
 
 
         /* Стили из оригинального шаблона */
@@ -94,24 +123,32 @@
             font-weight: 500;
             color: #000; /* Отличается от text-dark, оставляем */
         }
-<!--        .address {-->
-<!--            font-size: 1rem;-->
-<!--            color: #6c757d; /* совпадает с text-muted */-->
-<!--            margin-bottom: 0.8rem;-->
-<!--        }-->
-        .metro-list {
-             font-size: 0.8rem;
-             line-height: 1.6;
+
+        <!--
+        .address {
+        --> <!-- font-size: 1 rem;
+        --> <!-- color: #6c757d; /* совпадает с text-muted */
+        --> <!-- margin-bottom: 0.8 rem;
+        --> <!--
         }
+
+        -->
+        .metro-list {
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+
         .metro-list span {
             display: inline-block;
             margin-right: 1rem;
         }
+
         .metro-list .bi { /* Bootstrap Icons стилизуются своим CSS, но цвет можно переопределить */
             color: #198754; /* Bootstrap success color */
             margin-right: 0.3rem;
             vertical-align: baseline;
         }
+
         .section-title {
             font-weight: 500;
             font-size: 1.1rem;
@@ -121,34 +158,41 @@
             border: none;
             border-bottom: 1px solid #dee2e6; /* Bootstrap $gray-300 */
         }
+
         .detail-item {
             margin-bottom: 0.8rem;
             /* padding-right для ячеек лучше задавать инлайн или через :not(:last-child) если нужно */
         }
+
         .detail-item .label {
             display: block;
             font-size: 0.8rem;
             color: #6c757d; /* совпадает с text-muted */
             margin-bottom: 0;
         }
+
         .detail-item .value {
             font-size: 0.9rem;
             font-weight: 500;
         }
+
         .address .year-accanto-title .label {
-             font-size: 0.8rem;
-             color: #6c757d; /* совпадает с text-muted */
+            font-size: 0.8rem;
+            color: #6c757d; /* совпадает с text-muted */
         }
+
         .year-accanto-title .value {
-             font-size: 0.9rem;
-             font-weight: 500;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
+
         .description-text {
             line-height: 1.6;
             color: #343a40; /* Bootstrap $gray-700 */
             margin-top: 1rem;
             font-size: 0.9rem;
         }
+
         .contact-header {
             text-align: right;
             padding-bottom: 0.5rem;
@@ -158,23 +202,26 @@
             font-size: 0.85rem;
             color: #6c757d; /* совпадает с text-muted */
         }
-         .photo-gallery img {
+
+        .photo-gallery img {
             width: 100%;
             height: auto;
             display: block;
             margin-bottom: 1rem;
-         }
-         hr {
-             margin-top: 1.5rem;
-             margin-bottom: 0.8rem;
-             border: 0;
-             border-top: 1px solid #dee2e6; /* Bootstrap $gray-300 */
-             height: 0;
-         }
-         .footer-contact {
-             font-size: 0.8rem;
-             /* text-muted и text-center будут применены через классы */
-         }
+        }
+
+        hr {
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            border: 0;
+            border-top: 1px solid #dee2e6; /* Bootstrap $gray-300 */
+            height: 0;
+        }
+
+        .footer-contact {
+            font-size: 0.8rem;
+            /* text-muted и text-center будут применены через классы */
+        }
 
         /* Стили для таблицы с данными (например, таблица фильмов) */
         .data-table {
@@ -184,22 +231,26 @@
             vertical-align: top;
             border-collapse: collapse; /* Убедимся, что здесь тоже collapse */
         }
+
         .data-table th,
         .data-table td {
             padding: 0.75rem; /* Bootstrap-like padding */
             vertical-align: middle; /* Обычно для данных лучше middle */
             border-bottom: 1px solid #dee2e6; /* Bootstrap-like border */
         }
+
         .data-table thead th {
             vertical-align: bottom;
             border-bottom-width: 2px; /* Более жирная линия под заголовками */
             text-align: left; /* По умолчанию для th */
             font-weight: 700; /* Делаем заголовки жирными */
         }
+
         .data-table tbody tr:first-child th,
         .data-table tbody tr:first-child td {
-             border-top: 1px solid #dee2e6; /* Линия над первой строкой данных */
+            border-top: 1px solid #dee2e6; /* Линия над первой строкой данных */
         }
+
         /* Для "зебры", если нужно, как у .table-striped */
         /*
         .data-table tbody tr:nth-of-type(odd) {
@@ -230,7 +281,7 @@
                 <!-- Добавил padding-right для отступа между колонками -->
                 <div class="title-main fw-bold" style="margin-bottom: 0.25rem;">НАЗВАНИЕ</div>
                 <div class="address small text-muted fw-bold">АДРЕС</div>
-                <div class="year-accanto-title small text-muted">Год постройки: ГОД_ПОСТРОЙКИ</div>
+                <div class="year-accanto-title small text-muted">Тип жилья: ТИП_ЖИЛЬЯ (ГОД_ПОСТРОЙКИ г.)</div>
             </td>
             <td style="width: 25%; text-align: right; vertical-align: top;">
                 <div class="price-main fw-bold" style="margin-bottom: 0.25rem;">СТОИМОСТЬ</div>
@@ -250,9 +301,161 @@
         </tr>
     </table>
 
+    <br>
+    <br>
+    <table class="layout-table" style="width: 100%; border-spacing: 0;">
+        <!-- Основная таблица, растянутая на всю ширину -->
+        <tr>
+            <!-- ЛЕВАЯ КОЛОНКА: О КВАРТИРЕ -->
+            <td style="width: 50%; vertical-align: top; padding-right: 15px;">
+                <h4 class="section-title fw-bold">О квартире</h4>
+                <table class="inner-details-table" style="width: 100%;">
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Общая площадь</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ОБЩАЯ_ПЛОЩАДЬ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Жилая площадь</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ЖИЛАЯ_ПЛОЩАДЬ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Площадь кухни</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ПЛОЩАДЬ_КУХНИ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Высота потолков</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ВЫСОТА_ПОТОЛКОВ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Этаж</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">FLOR из ЭТАЖНОСТЬ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Отделка/Ремонт</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">РЕМОНТ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Санузел</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">САНУЗЕЛ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Вид из окон</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ВИД_ИЗ_ОКОН</span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+
+            <!-- ПРАВАЯ КОЛОНКА: О ДОМЕ -->
+            <td style="width: 50%; vertical-align: top; padding-left: 15px;">
+                <h4 class="section-title fw-bold">О доме</h4>
+                <table class="inner-details-table" style="width: 100%;">
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Тип дома</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ТИП_ДОМА</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Тип перекрытий</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ТИП_ПЕРЕКРЫТИЙ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Строительная серия</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">СТРОИТЕЛЬНАЯ_СЕРИЯ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Лифт</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">КОЛИЧЕСТВО_ЛИФТОВ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Подъезды</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ПОДЪЕЗДЫ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Парковка</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ПАРКОВКА</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Отопление</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">ОТОПЛЕНИЕ</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="detail-item-label">
+                            <span class="label">Аварийность</span>
+                        </td>
+                        <td class="detail-item-value">
+                            <span class="value">АВАРИЙНОСТЬ</span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <br>
+
+    <br>
+
 
     <!-- Детали Квартиры -->
-    <h4 class="section-title">О квартире</h4>
+    <h4 class="section-title fw-bold">О квартире</h4>
     <table class="layout-table">
         <tr>
             <td style="width: 25%; padding-right: 10px;" class="detail-item">
@@ -296,13 +499,9 @@
     <table class="layout-table" style="margin-top: 1rem; vertical-align: middle;">
         <tr>
             <td>
-                <h4 class="section-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none !important;">О
-                    доме</h4>
+                <h4 class="section-title fw-bold"
+                    style="margin-bottom: 0; padding-bottom: 0; border-bottom: none !important;">О доме</h4>
             </td>
-            <!--            <td style="text-align: right;" class="year-accanto-title">-->
-            <!--                <span class="label" style="display: inline; margin-right: 0.25rem;">Год постройки:</span>-->
-            <!--                <span class="value" style="display: inline;">ГОД_ПОСТРОЙКИ</span>-->
-            <!--            </td>-->
         </tr>
     </table>
     <hr style="margin-top: 0.25rem; margin-bottom: 1rem;">
@@ -348,7 +547,7 @@
     </table>
 
     <!-- Описание -->
-    <h4 class="section-title">Описание</h4>
+    <h4 class="section-title fw-bold">Описание</h4>
     <div class="description-text">
         ОПИСАНИЕ <!-- Ожидается текст с <br> -->
     </div>
@@ -358,15 +557,16 @@
     <div class="text-center text-muted footer-contact" style="margin-top: 0.5rem; padding-bottom: 1rem;">
         <div>
             Отчёт создан через бот | <a href="https://t.me/kriss_real_estate_bot"
-                                  class="text-decoration-none text-dark fw-bold">Помощник риелтора</a>
+                                        class="text-decoration-none text-dark fw-bold">Помощник риелтора</a>
         </div>
         <div>
-            <img src="E:\py\main\simple_real_estate_bot\downloads\QR_bot.png" style="width:300px;" alt="Помощник риелтора">
+            <img src="E:\py\main\simple_real_estate_bot\downloads\QR_bot.png" style="width:300px;"
+                 alt="Помощник риелтора">
         </div>
         <div>
             <a href="https://t.me/kriss_real_estate_bot"
-                                  class="text-decoration-none text-dark fw-bold">
-            @kriss_real_estate_bot</a>
+               class="text-decoration-none text-dark fw-bold">
+                @kriss_real_estate_bot</a>
         </div>
     </div>
 

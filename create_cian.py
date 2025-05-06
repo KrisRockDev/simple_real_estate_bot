@@ -68,7 +68,7 @@ def create_report_cian(res, cian_number):
     Args:
         res (dict): Словарь с данными для заполнения шаблона.
     """
-    tempfile_path = os.path.join(templates_dir_absolute, 'cian6.html')
+    tempfile_path = os.path.join(templates_dir_absolute, 'cian7.html')
     output_filename = 'index.html'  # Имя выходного файла
     output_path = os.path.join(os.path.join(downloads_dir_absolute, cian_number), output_filename)
 
@@ -141,6 +141,7 @@ def create_report_cian(res, cian_number):
             ('ТЕЛЕФОН_РИЕЛТОРА', os.getenv("PHONE")),
             ('НАЗВАНИЕ', res.get('title', 'Без названия')),
             ('АДРЕС', res.get('adress', 'Адрес не указан')),
+            ('ТИП_ЖИЛЬЯ', params.get('Тип жилья', 'Тип не указан')),
             ('СТОИМОСТЬ', format_price(res.get('price', 'Цена не указана'))),
             ('МЕТРО', metro_html),  # Подставляем сгенерированный HTML для метро
             ('ЦЕНА_ЗА_МЕТР', offer.get('Цена за метр', 'Не указано')),
@@ -149,7 +150,7 @@ def create_report_cian(res, cian_number):
             ('ИПОТЕКА', offer.get('Ипотека', 'Не указано')),
             ('ТИП_ЖИЛЬЯ', 'Квартира'),  # Пример, т.к. нет в res. Можно сделать сложнее, если надо
             ('ФОТОГРАФИИ', images_html),  # Подставляем сгенерированный HTML для фото
-            ('ГОД_ПОСТРОЙКИ', params.get('Год сдачи', 'Не указан')),  # Используем "Год сдачи"
+            ('ГОД_ПОСТРОЙКИ', params.get('Год постройки', params.get('Год сдачи', 'Не указан'))),  # Используем "Год сдачи"
             ('ОБЩАЯ_ПЛОЩАДЬ', f"{params.get('Общая площадь', '?')} м²"),
             ('ЖИЛАЯ_ПЛОЩАДЬ', f"{params.get('Жилая площадь', '?')} м²"),  # Добавлено, если появится в res
             ('ПЛОЩАДЬ_КУХНИ', f"{params.get('Площадь кухни', '?')} м²"),

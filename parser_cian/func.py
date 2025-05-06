@@ -44,6 +44,7 @@ def get_title(soup):
         printer(f'error_get_title: Произошла ошибка при извлечении заголовка: {_ex}', kind='error')
         return None
 
+
 def get_adress(soup):
     try:
         # Находим блок с атрибутом data-name="AddressContainer"
@@ -123,7 +124,7 @@ def get_metro(soup):
         return None
 
 
-def get_params(soup):
+def get_params_old(soup):
     try:
         factoids_block = soup.find('div', {'data-name': 'ObjectFactoids'})
         if not factoids_block:
@@ -148,27 +149,122 @@ def get_params(soup):
 
             result[category] = value
 
-        printer(f"[Параметры] {result=}", kind='info')
+        printer(f"[Параметры_old] {result=}", kind='info')
         return result
     except Exception as _ex:
         printer(f'error_get_params: {_ex}', kind='error')
         return None
 
 
+def get_params(soup):
+    params_old = get_params_old(soup)
+    try:
+        # 1. Находим основной блок с информацией о квартире
+        summary_group = soup.find('div', {'data-name': 'OfferSummaryInfoGroup'})
+        if not summary_group:
+            printer("Блок 'OfferSummaryInfoGroup' не найден.", kind='warning')
+            return None
+
+        result = {}
+        if 'Этаж' in params_old:
+            result['Этаж'] = params_old['Этаж']
+        if 'Дом' in params_old:
+            result['Дом'] = params_old['Дом']
+        if 'Год постройки' in params_old:
+            result['Год постройки'] = params_old['Год постройки']
+        if 'Год сдачи' in params_old:
+            result['Год сдачи'] = params_old['Год сдачи']
+
+
+        # 2. Итерируемся по каждому элементу параметра
+        for item in summary_group.find_all('div', {'data-name': 'OfferSummaryInfoItem'}):
+            # Ищем категорию (ключ) по частичному совпадению класса в теге <p>
+            category_p = item.find('p', class_=lambda x: x and 'color_gray60_100' in x)
+            # Ищем значение по частичному совпадению класса в теге <p>
+            value_p = item.find('p', class_=lambda x: x and 'color_text-primary-default' in x)
+
+            if not category_p or not value_p:
+                printer(f"Не удалось найти категорию или значение в элементе: {item.prettify()}", kind='debug')
+                continue
+
+            category = category_p.text.strip()
+            value = value_p.text.strip().replace('\xa0', ' ')  # Заменяем неразрывный пробел
+            # ic(category) # Раскомментируйте для отладки
+            # ic(value)   # Раскомментируйте для отладки
+
+            # Убираем единицы измерения
+            if 'площад' in category.lower():
+                value = value.replace('м²', '').strip()
+            elif 'высота потолков' in category.lower():  # Добавлено для высоты потолков
+                value = value.replace('м', '').strip()
+            # Можно добавить другие специфичные очистки, если потребуется
+
+            result[category] = value
+
+        if not result:
+            printer("Не найдено ни одного параметра в 'OfferSummaryInfoGroup'.", kind='warning')
+            return None
+
+        printer(f"[Параметры] {result=}", kind='info')
+        return result
+    except Exception as _ex:
+        printer(f'error_get_params_new: {_ex}', kind='error')
+        return None
+
+
+# def get_description(soup):
+#     try:
+#         # Извлекаем текст из тега span
+#         target_div = soup.find('div', {'data-id': 'content'})
+#
+#         if target_div:
+#             text_data = target_div.get_text(separator='\n', strip=True)
+#             result = ''.join(line.strip() for line in text_data.split('\n') if line.strip())
+#             result = result.replace('-\t', '<br>- ').replace('.-', '.<br>-')
+#             printer(f"{result=}", kind='info')
+#         else:
+#             printer("[get_description] Не удалось найти указанный div с атрибутом data-id='content'.", kind='error')
+#
+#         return result
+#     except Exception as _ex:
+#         printer(f'error_get_description: {_ex}', kind='error')
+#         return None
+
+
+
 def get_description(soup):
     try:
-        # Извлекаем текст из тега span
-        target_div = soup.find('div', {'data-id': 'content'})
+        # Находим родительский div
+        container_div = soup.find('div', {'data-id': 'content'})
 
-        if target_div:
-            text_data = target_div.get_text(separator='\n', strip=True)
-            result = ''.join(line.strip() for line in text_data.split('\n') if line.strip())
-            result = result.replace('-\t', '<br>- ')
-            printer(f"{result=}", kind='info')
+        if not container_div:
+            printer("[get_description] Не удалось найти div с атрибутом data-id='content'.", kind='error')
+            return None
+
+        # Находим нужный span внутри div.
+        # Можно использовать один из классов, например, тот, что отвечает за white-space,
+        # так как он важен для форматирования.
+        # Классы очень длинные и могут меняться, выберите наиболее стабильный или комбинацию.
+        target_span = container_div.find('span', class_=lambda
+            c: c and 'a10a3f92e9--text_whiteSpace__pre-wrap--dFity' in c.split())
+        # Альтернативно, если это единственный span или первый span в div:
+        # target_span = container_div.find('span')
+
+        if target_span:
+            # Используем .strings для получения всех текстовых узлов как они есть
+            # ''.join() соединит их, сохраняя все внутренние пробелы и переносы строк
+            raw_text = ''.join(target_span.strings)
+
+            # .strip() уберет лишние пробелы/переносы только в начале и конце всего блока,
+            # но сохранит все внутренние.
+            result = raw_text.strip().replace('\n', '<br>')
+
+            printer(f"[Описание]: {result}", kind='info')  # для отладки
+            return result
         else:
-            printer("[get_description] Не удалось найти указанный div с атрибутом data-id='content'.", kind='error')
+            printer("[get_description] Не удалось найти целевой span внутри div.", kind='error')
+            return None
 
-        return result
     except Exception as _ex:
         printer(f'error_get_description: {_ex}', kind='error')
         return None
@@ -176,9 +272,9 @@ def get_description(soup):
 
 def save_image(image_directory, img_url, number):
     img_url = img_url.replace('-2.jpg', '-1.jpg')
-    t = 0.7
+    t = 0.9
     if number % 2 == 0:
-        t += 0.3
+        t += 0.4
     time.sleep(t)
     try:
         response = requests.get(img_url)
