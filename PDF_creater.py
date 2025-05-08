@@ -51,6 +51,6 @@ if __name__ == "__main__":
     for i in ['316598899', '312256069']:
         converter(
             # DIRECTORY=rf'e:\py\main\simple_real_estate_bot\downloads\{i}\index.html'
-            # DIRECTORY=rf'E:\py\main\simple_real_estate_bot\html_template\cian5.html'
-            DIRECTORY=rf'E:\py\main\simple_real_estate_bot\html_template\test1.html'
+            DIRECTORY=rf'E:\py\main\simple_real_estate_bot\html_template\cian7.html'
+            # DIRECTORY=rf'E:\py\main\simple_real_estate_bot\html_template\test1.html'
         )

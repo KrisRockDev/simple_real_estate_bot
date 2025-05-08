@@ -539,7 +539,7 @@ def save_image(image_directory, img_url, number):
         # printer(f"Пауза перед загрузкой {img_url_modified}: {t:.1f} сек.", kind='info')  # Отладочное сообщение
         time.sleep(t)
 
-        printer(f"Загрузка изображения: {img_url_modified}", kind='info')  # Отладочное сообщение
+        # printer(f"Загрузка изображения: {img_url_modified}", kind='info')  # Отладочное сообщение
         response = requests.get(img_url_modified, timeout=15)  # Добавлен таймаут для запроса
         response.raise_for_status()  # Проверка на HTTP ошибки (4xx, 5xx)
 
