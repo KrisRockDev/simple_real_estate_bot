@@ -80,8 +80,11 @@ def create_report_cian(res, cian_number):
 
         # Безопасное извлечение данных с дефолтными значениями
         offer = res.get('offer', {})
-        params = res.get('params', {})
         metro_list = res.get('metro', [])
+        params = res.get('params', {})
+        developer = res.get('developer', {})
+        rosreestr = res.get('rosreestr', {})
+        agent = res.get('agent', {})
         images = res.get('images', [])
         description = res.get('description', 'Описание отсутствует.')
 
@@ -135,42 +138,245 @@ def create_report_cian(res, cian_number):
             total_floors = '?'  # Неизвестно
 
         # --- Список замен ---
-        # Используем .get() для предотвращения KeyError, если ключ отсутствует
+        # Список значений, которые, если получены из params, означают отсутствие данных для отображения
+        # (кроме случаев, когда само значение информативно, как "Нет данных")
+        EMPTY_VALUES_FOR_HIDE = ['?', None, '', 'Не указано', 'Не указана', 'Нет данных']
+        # --- Функции для генерации HTML строк для таблицы деталей ---
+
+        def generate_total_area_row(params_dict):
+            value = params_dict.get('Общая площадь')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Общая площадь</span></td>
+                                <td class="value-cell"><span class="value">{value} м²</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_living_area_row(params_dict):
+            value = params_dict.get('Жилая площадь')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Жилая площадь</span></td>
+                                <td class="value-cell"><span class="value">{value} м²</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_kitchen_area_row(params_dict):
+            value = params_dict.get('Площадь кухни')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Площадь кухни</span></td>
+                                <td class="value-cell"><span class="value">{value} м²</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_ceiling_height_row(params_dict):
+            value = params_dict.get('Высота потолков')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Высота потолков</span></td>
+                                <td class="value-cell"><span class="value">{value} м</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_floor_info_row(floor_val, total_floors_val):
+            floor_str = str(floor_val) if floor_val not in EMPTY_VALUES_FOR_HIDE else None
+            total_floors_str = str(total_floors_val) if total_floors_val not in EMPTY_VALUES_FOR_HIDE else None
+
+            if floor_str and total_floors_str:
+                value_display = f"{floor_str} из {total_floors_str}"
+            elif floor_str:
+                value_display = floor_str
+            elif total_floors_str:  # Менее вероятно, но возможно
+                value_display = f"? из {total_floors_str}"
+            else:
+                return ''  # Нет данных для отображения
+
+            return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Этаж</span></td>
+                                <td class="value-cell"><span class="value">{value_display}</span></td>
+                            </tr>"""
+
+        def generate_renovation_row(params_dict):
+            value = params_dict.get('Отделка')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Отделка/Ремонт</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_bathroom_row(params_dict):
+            value = params_dict.get('Санузел')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Санузел</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_window_view_row(params_dict):
+            value = params_dict.get('Вид из окон')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Вид из окон</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        # Функции для правой колонки "О доме"
+
+        def generate_house_type_row(params_dict):
+            value = params_dict.get('Тип дома')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Тип дома</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_flooring_type_row(params_dict):
+            value = params_dict.get('Тип перекрытий')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Тип перекрытий</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_building_series_row(params_dict):
+            value = params_dict.get('Строительная серия')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Строительная серия</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_elevator_count_row(params_dict):
+            value = params_dict.get('Количество лифтов')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Лифт</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_entrances_row(params_dict):
+            value = params_dict.get('Подъезды')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Подъезды</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_parking_row(params_dict):
+            value = params_dict.get('Парковка')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Парковка</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_heating_row(params_dict):
+            value = params_dict.get('Отопление')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Отопление</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_emergency_status_row(params_dict):
+            value = params_dict.get('Аварийность')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Аварийность</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+
+        def generate_gas_status_row(params_dict):
+            value = params_dict.get('Газоснабжение')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Газоснабжение</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_saler_status_row(params_dict):
+            value = params_dict.get('Обременения')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Обременения</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_peoples_status_row(params_dict):
+            value = params_dict.get('Собственников')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Собственников</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_kadaster_status_row(params_dict):
+            value = params_dict.get('Кадастровый номер')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Кадастровый номер</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        # Обновленный replace_list
+        # Переменные floor и total_floors должны быть определены до этого списка
+        # (например, извлечены из params или другого источника)
+
         replace_list = [
-            ('ИМЯ_РЕЕЛТОРА', os.getenv("NAME")),
-            ('ТЕЛЕФОН_РИЕЛТОРА', os.getenv("PHONE")),
+            ('ИМЯ_РЕЕЛТОРА', os.getenv("NAME", "Имя не указано")),
+            ('ТЕЛЕФОН_РИЕЛТОРА', os.getenv("PHONE", "Телефон не указан")),
             ('НАЗВАНИЕ', res.get('title', 'Без названия')),
             ('АДРЕС', res.get('adress', 'Адрес не указан')),
-            ('ТИП_ЖИЛЬЯ', params.get('Тип жилья', 'Тип не указан')),
-            ('СТОИМОСТЬ', format_price(res.get('price', 'Цена не указана'))),
-            ('МЕТРО', metro_html),  # Подставляем сгенерированный HTML для метро
+            ('ТИП_ЖИЛЬЯ', params.get('Тип жилья', 'Тип не указан')), # Закомментировано, т.к. ниже есть 'Квартира'
+            ('СТОИМОСТЬ', format_price(res.get('price', 0))),
+            ('МЕТРО', metro_html),
             ('ЦЕНА_ЗА_МЕТР', offer.get('Цена за метр', 'Не указано')),
-            # Пытаемся взять "Условия сделки", иначе проверяем "Дом"
             ('УСЛОВИЯ_СДЕЛКИ', offer.get('Условия сделки', params.get('Дом', 'Не указано')).capitalize()),
             ('ИПОТЕКА', offer.get('Ипотека', 'Не указано')),
-            ('ТИП_ЖИЛЬЯ', 'Квартира'),  # Пример, т.к. нет в res. Можно сделать сложнее, если надо
-            ('ФОТОГРАФИИ', images_html),  # Подставляем сгенерированный HTML для фото
-            ('ГОД_ПОСТРОЙКИ', params.get('Год постройки', params.get('Год сдачи', 'Не указан'))),  # Используем "Год сдачи"
-            ('ОБЩАЯ_ПЛОЩАДЬ', f"{params.get('Общая площадь', '?')} м²"),
-            ('ЖИЛАЯ_ПЛОЩАДЬ', f"{params.get('Жилая площадь', '?')} м²"),  # Добавлено, если появится в res
-            ('ПЛОЩАДЬ_КУХНИ', f"{params.get('Площадь кухни', '?')} м²"),
-            ('ВЫСОТА_ПОТОЛКОВ', f"{params.get('Высота потолков', '?')} м"),  # Добавлено, если появится в res
-            ('FLOR', floor),
-            ('ЭТАЖНОСТЬ', total_floors),
-            ('ПОДЪЕЗДЫ', params.get('Подъезды', 'Не указано')),  # Добавлено
-            ('ВИД_ИЗ_ОКОН', params.get('Вид из окон', 'Не указано')),  # Добавлено
-            ('САНУЗЕЛ', params.get('Санузел', 'Не указано')),  # Добавлено
-            ('КОЛИЧЕСТВО_ЛИФТОВ', params.get('Лифт', 'Не указано')),  # Добавлено (ищем ключ "Лифт")
-            ('ПАРКОВКА', params.get('Парковка', 'Не указано')),  # Добавлено
-            ('АВАРИЙНОСТЬ', params.get('Аварийность', 'Нет данных')),  # Добавлено (исправлена опечатка)
-            ('РЕМОНТ', params.get('Отделка', 'Не указано')),  # Используем "Отделка"
-            ('СТРОИТЕЛЬНАЯ_СЕРИЯ', params.get('Строй. серия', 'Не указана')),  # Добавлено
-            ('ОТОПЛЕНИЕ', params.get('Отопление', 'Центральное')),  # Добавлено (можно указать дефолт)
-            ('ТИП_ДОМА', params.get('Тип дома', 'Не указан')),  # Добавлено
-            # ('ТИП_ЖИЛЬЯ', params.get('Тип жилья', 'Не указан')), # Уже есть выше, если надо именно из params
-            ('ТИП_ПЕРЕКРЫТИЙ', params.get('Тип перекрытий', 'Не указан')),  # Добавлено
-            ('ОПИСАНИЕ', cleaned_description),  # Очищенное и отформатированное описание
-            ('ФОТООТЧЁТ', images_html)  # Используем те же фото, что и для основного блока
+            ('ФОТОГРАФИИ', images_html),
+            ('ГОД_ПОСТРОЙКИ', params.get('Год постройки', params.get('Год сдачи', 'Не указан'))),
+            ('ОПИСАНИЕ', cleaned_description),
+            ('ФОТООТЧЁТ', images_html),  # Используем те же фото, что и для основного блока
+
+            # Плейсхолдеры для строк таблицы деталей, заменяемые вызовами функций
+            ('ОБЩАЯ_ПЛОЩАДЬ_ROW', generate_total_area_row(params)),
+            ('ЖИЛАЯ_ПЛОЩАДЬ_ROW', generate_living_area_row(params)),
+            ('ПЛОЩАДЬ_КУХНИ_ROW', generate_kitchen_area_row(params)),
+            ('ВЫСОТА_ПОТОЛКОВ_ROW', generate_ceiling_height_row(params)),
+            ('ЭТАЖ_ROW', generate_floor_info_row(floor, total_floors)),  # floor и total_floors передаются как аргументы
+            ('РЕМОНТ_ROW', generate_renovation_row(params)),
+            ('САНУЗЕЛ_ROW', generate_bathroom_row(params)),
+            ('ВИД_ИЗ_ОКОН_ROW', generate_window_view_row(params)),
+            ('СОБСТВЕННИКОВ_ROW', generate_saler_status_row(rosreestr)),
+            ('ОБРЕМЕНЕНИЯ_ROW', generate_peoples_status_row(rosreestr)),
+            ('КАДАСТРОВЫЙ_НОМЕР_ROW', generate_kadaster_status_row(rosreestr)),
+
+            ('ТИП_ДОМА_ROW', generate_house_type_row(params)),
+            ('ТИП_ПЕРЕКРЫТИЙ_ROW', generate_flooring_type_row(params)),
+            ('СТРОИТЕЛЬНАЯ_СЕРИЯ_ROW', generate_building_series_row(params)),
+            ('КОЛИЧЕСТВО_ЛИФТОВ_ROW', generate_elevator_count_row(params)),
+            ('ПОДЪЕЗДЫ_ROW', generate_entrances_row(params)),
+            ('ПАРКОВКА_ROW', generate_parking_row(params)),
+            ('ОТОПЛЕНИЕ_ROW', generate_heating_row(params)),
+            ('АВАРИЙНОСТЬ_ROW', generate_emergency_status_row(params)),
+            ('ГАЗОСНАБЖЕНИЕ_ROW', generate_gas_status_row(params)),
         ]
 
         # --- Выполнение замен ---

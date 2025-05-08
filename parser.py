@@ -35,10 +35,14 @@ def parse_cian(URL, cookies, headers):
             'title': get_title(soup),
             'adress': get_adress(soup),
             'price': get_price(soup),
-            'offer':get_offer(soup),
-            'metro':get_metro(soup),
-            'params':get_params(soup),
-            'description':get_description(soup),
+            'offer': get_offer(soup),
+            'metro': get_metro(soup),
+            # 'params':get_params(soup),
+            'params': get_all_offer_params(soup),
+            'developer': get_developer_info(soup),
+            'rosreestr': get_rosreestr_info(soup),
+            'agent': get_agent_info(soup),
+            'description': get_description(soup),
             'images': get_imgages(soup, cian_number),
         }
 
@@ -54,6 +58,7 @@ if __name__ == '__main__':
     URLs = [
         'https://www.cian.ru/sale/flat/312256069/',
         'https://www.cian.ru/sale/flat/316598899/',
+        'https://www.cian.ru/sale/flat/312564948/'
     ]
 
     for URL in URLs:
