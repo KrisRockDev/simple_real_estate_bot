@@ -225,10 +225,10 @@
 
         .contact-header {
             text-align: right;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-            border: none;
-            border-bottom: 1px solid #eee;
+            /* padding-bottom: 0.5rem; -- Убрано, управляется padding'ом таблицы */
+            /* margin-bottom: 1rem; -- Убрано, т.к. линия теперь на таблице */
+            /* border: none; -- Убрано */
+            /* border-bottom: 1px solid #eee; -- Убрано, перенесено на таблицу */
             font-size: 0.85rem;
             color: #6c757d;
         }
@@ -284,21 +284,35 @@
 <body>
 
 <div class="container">
-
     <!-- Шапка с контактами -->
-    <div class="contact-header">
-        Риелтор ИМЯ_РЕЕЛТОРА | <a href="tel:ТЕЛЕФОН_РИЕЛТОРА" class="text-decoration-none text-dark fw-bold">ТЕЛЕФОН_РИЕЛТОРА</a>
-        <img src="E:\py\main\simple_real_estate_bot\html_template\whatsapp-48.png"
-             style="width:24px; vertical-align: middle;">
-        <img src="E:\py\main\simple_real_estate_bot\html_template\instagram-48.png"
-             style="width:24px; vertical-align: middle;">
-        <img src="E:\py\main\simple_real_estate_bot\html_template\теlegram-48.png"
-             style="width:24px; vertical-align: middle;">
-        <img src="E:\py\main\simple_real_estate_bot\html_template\vk-48.png"
-             style="width:24px; vertical-align: middle;">
-        <img src="E:\py\main\simple_real_estate_bot\html_template\viber-48.png"
-             style="width:24px; vertical-align: middle;">
-    </div>
+    <table class="layout-table" style="margin-bottom: 0.8rem; border-bottom: 1px solid #eee !important; padding-bottom: 0.5rem;">
+        <tr>
+            <td style="width: 30%; vertical-align: center; padding-right: 15px;">
+                <div>
+                    <a href="https://t.me/kriss_real_estate_bot"
+                       class="text-decoration-none text-dark fw-bold">
+                        <img src="E:\py\main\simple_real_estate_bot\html_template\теlegram-48.png"
+                             style="width:24px; vertical-align: middle;">@kriss_real_estate_bot</a>
+                </div>
+            </td>
+            <td style="width: 70%; text-align: right; vertical-align: center;">
+                <div class="contact-header">
+                    Риелтор ИМЯ_РЕЕЛТОРА | <a href="tel:ТЕЛЕФОН_РИЕЛТОРА"
+                                              class="text-decoration-none text-dark fw-bold">ТЕЛЕФОН_РИЕЛТОРА</a>
+                    <img src="E:\py\main\simple_real_estate_bot\html_template\whatsapp-48.png"
+                         style="width:24px; vertical-align: middle;">
+                    <img src="E:\py\main\simple_real_estate_bot\html_template\instagram-48.png"
+                         style="width:24px; vertical-align: middle;">
+                    <img src="E:\py\main\simple_real_estate_bot\html_template\теlegram-48.png"
+                         style="width:24px; vertical-align: middle;">
+                    <img src="E:\py\main\simple_real_estate_bot\html_template\vk-48.png"
+                         style="width:24px; vertical-align: middle;">
+                    <img src="E:\py\main\simple_real_estate_bot\html_template\viber-48.png"
+                         style="width:24px; vertical-align: middle;">
+                </div>
+            </td>
+        </tr>
+    </table>
 
     <!-- Основная информация: Название, Адрес, Цена -->
     <table class="layout-table" style="margin-bottom: 0.8rem;">
@@ -307,7 +321,7 @@
                 <div class="title-main fw-bold" style="margin-bottom: 0.25rem;">НАЗВАНИЕ</div>
                 <div class="address text-muted fw-bold">АДРЕС</div>
                 <div class="year-accanto-title small text-muted">Тип жилья: ТИП_ЖИЛЬЯ (ГОД_ПОСТРОЙКИ г.)</div>
-                ЗАСТРОЙЩИК_ROW
+
             </td>
             <td style="width: 30%; text-align: right; vertical-align: top;">
                 <div class="price-main fw-bold" style="margin-bottom: 0.25rem;">СТОИМОСТЬ</div>
@@ -341,6 +355,7 @@
                     ЭТАЖ_ROW
                     БАЛКОН_ROW
                     РЕМОНТ_ROW
+                    ОТДЕЛКА_ROW
                     САНУЗЕЛ_ROW
                     ВИД_ИЗ_ОКОН_ROW
                     СОБСТВЕННИКОВ_ROW
@@ -353,6 +368,8 @@
             <td style="width: 50%; vertical-align: top; padding-left: 15px;">
                 <h4 class="section-title fw-bold">О доме</h4>
                 <table class="characteristics-table">
+                    ЗАСТРОЙЩИК_ROW
+                    КЛАСС_ДОМА_ROW
                     ТИП_ДОМА_ROW
                     СТРОИТЕЛЬНАЯ_СЕРИЯ_ROW
                     КОЛИЧЕСТВО_ЛИФТОВ_ROW
@@ -367,7 +384,7 @@
         </tr>
     </table>
     <!-- КОНЕЦ ДВУХКОЛОНОЧНОЙ ТАБЛИЦЫ -->
-<!--<p style="page-break-before: always;"></p>-->
+    <!--<p style="page-break-before: always;"></p>-->
     <!-- Описание -->
     <h4 class="section-title fw-bold">Описание</h4>
     <div class="description-text">

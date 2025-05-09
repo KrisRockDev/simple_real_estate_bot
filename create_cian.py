@@ -3,6 +3,7 @@ import re  # Для очистки описания от лишних пробе
 import traceback  # Для более детальной информации об ошибке
 from settings import templates_dir_absolute, downloads_dir_absolute
 from dotenv import load_dotenv
+from icecream import ic
 
 load_dotenv()
 
@@ -92,6 +93,7 @@ def create_report_cian(res, cian_number):
         metro_list = res.get('metro') or []
         params = res.get('params') or {}
         developer = res.get('developer') or {}
+        ic(developer)
         rosreestr = res.get('rosreestr') or {}
         agent = res.get('agent') or {}
         images = res.get('images') or []
@@ -157,11 +159,33 @@ def create_report_cian(res, cian_number):
         # (Эти функции теперь получают словари params или rosreestr, которые гарантированно являются dict)
 
         def generate_developer_row(params_dict):
-            value = params_dict.get('developer')
+            value = params_dict.get('Застройщик')
             if value not in EMPTY_VALUES_FOR_HIDE:
-                return f"""<div class="address text-muted fw-bold">{value}</div>"""
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Застройщик</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
             return ''
 
+        def generate_class_row(params_dict):
+            value = params_dict.get('Класс')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Класс</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_otdelka_row(params_dict):
+            ic(params_dict)
+            value = params_dict.get('Отделка')
+            ic(params_dict.get('Отделка'))
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Отделка</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
 
         def generate_total_area_row(params_dict):
             value = params_dict.get('Общая площадь')
@@ -385,6 +409,7 @@ def create_report_cian(res, cian_number):
             ('ЭТАЖ_ROW', generate_floor_info_row(floor, total_floors)),
             ('БАЛКОН_ROW', generate_balcon_row(params)),
             ('РЕМОНТ_ROW', generate_renovation_row(params)),
+            ('ОТДЕЛКА_ROW', generate_otdelka_row(params)),
             ('САНУЗЕЛ_ROW', generate_bathroom_row(params)),
             ('ВИД_ИЗ_ОКОН_ROW', generate_window_view_row(params)),
             ('СОБСТВЕННИКОВ_ROW', generate_saler_status_row(rosreestr)),
@@ -402,6 +427,8 @@ def create_report_cian(res, cian_number):
             ('ГАЗОСНАБЖЕНИЕ_ROW', generate_gas_status_row(params)),
 
             ('ЗАСТРОЙЩИК_ROW', generate_developer_row(developer)),
+            ('КЛАСС_ДОМА_ROW', generate_class_row(developer)),
+            # ('ОТДЕЛКА_ROW', generate_otdelka_row(developer)),
 
         ]
 

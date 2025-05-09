@@ -57,8 +57,8 @@ def parse_cian(URL, cookies, headers):
 if __name__ == '__main__':
     URLs = [
         'https://www.cian.ru/sale/flat/312256069/',
-        'https://www.cian.ru/sale/flat/316598899/',
-        'https://www.cian.ru/sale/flat/312564948/'
+        # 'https://www.cian.ru/sale/flat/316598899/',
+        # 'https://www.cian.ru/sale/flat/312564948/'
     ]
 
     for URL in URLs:
