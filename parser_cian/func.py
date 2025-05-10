@@ -4,6 +4,8 @@ import requests
 from icecream import ic
 from settings import downloads_dir_absolute
 from servise import printer
+import re
+from datetime import datetime, timedelta
 
 
 def get_title(soup):
@@ -45,20 +47,61 @@ def get_title(soup):
         return None
 
 
+# def get_adress(soup):
+#     try:
+#         # Находим блок с атрибутом data-name="AddressContainer"
+#         address_container = soup.find('div', {'data-name': 'AddressContainer'})
+#         # Извлекаем текст из найденного блока
+#         result = ''.join(address_container.get_text(separator='\t').replace('\t,', '').split('\t')[-3:-1])
+#         if ' ул. ' in result:
+#             result = f'ул. {result.replace(' ул. ', ' д.')}'
+#         printer(f"[Адрес] {result}", kind='info')
+#         return result
+#     except Exception as _ex:
+#         printer(f'error_get_adress: {_ex}', kind='error')
+#         return None
+
+
 def get_adress(soup):
     try:
         # Находим блок с атрибутом data-name="AddressContainer"
         address_container = soup.find('div', {'data-name': 'AddressContainer'})
-        # Извлекаем текст из найденного блока
-        result = ''.join(address_container.get_text(separator='\t').replace('\t,', '').split('\t')[-3:-1])
+        if not address_container:
+            printer('error_get_adress: AddressContainer not found', kind='error')
+            return None
+
+        # Находим все элементы <a> с атрибутом data-name="AddressItem" внутри контейнера
+        address_items = address_container.find_all('a', {'data-name': 'AddressItem'})
+
+        if not address_items:
+            printer('error_get_adress: No AddressItem elements found in AddressContainer', kind='error')
+            # Как запасной вариант, можно попробовать взять весь текст, если нет AddressItem,
+            # но это менее надежно и может потребовать дополнительной очистки.
+            # Для данного случая, найдем AddressItem.
+            return None
+
+        # Извлекаем текст из каждого найденного элемента и удаляем лишние пробелы
+        parts = [item.get_text(strip=True) for item in address_items]
+
+        # Объединяем части адреса через запятую и пробел
+        result = ", ".join(parts)
+
+        # Ваша оригинальная логика для обработки " ул. "
+        # Примечание: для текущего HTML эта часть не будет выполнена, т.к. " ул. " нет в `result`.
+        # Она оставлена для совместимости, если другие адреса могут содержать " ул. ".
         if ' ул. ' in result:
-            result = f'ул. {result.replace(' ул. ', ' д.')}'
+            # Эта логика преобразует, например, "Что-то ул. Название, ХХ" в "ул. Что-то д. Название, ХХ"
+            # Возможно, это не всегда желаемое поведение, но сохранено как в оригинале.
+            result = f'ул. {result.replace(" ул. ", " д.")}'
+
         printer(f"[Адрес] {result}", kind='info')
         return result
+    except AttributeError as ae: # Если soup.find вернул None и мы пытаемся вызвать на нем метод
+        printer(f'error_get_adress: Attribute error, possibly missing HTML element - {ae}', kind='error')
+        return None
     except Exception as _ex:
         printer(f'error_get_adress: {_ex}', kind='error')
         return None
-
 
 def get_price(soup):
     try:
@@ -205,7 +248,7 @@ def get_params(soup):
             return None
 
         # printer(f"[Параметры] {result=}", kind='info')
-        ic(result)
+        # ic(result)
         return result
     except Exception as _ex:
         printer(f'error_get_params_new: {_ex}', kind='error')
@@ -271,8 +314,303 @@ def get_all_offer_params(soup):
         return None
 
     printer(f"[Итоговые параметры] {params_data}", kind='info')
-    ic(params_data)
+    # ic(params_data)
     return params_data
+
+
+# Вспомогательная функция для парсинга блока с информацией об агентстве или риелторе
+def _parse_branding_card_details(card_soup, prefix, result_dict):
+    """
+    Извлекает детали (тип, имя, ссылку, лейблы) из карточки агентства/риелтора.
+    """
+    if not card_soup:
+        return
+
+    # Тип (Агентство недвижимости / Риелтор)
+    # <span style="letter-spacing:1px" class="a10a3f92e9--color_gray60_100--r_axa ...">Агентство недвижимости</span>
+    type_span = card_soup.find('span', class_=lambda
+        c: c and 'a10a3f92e9--color_gray60_100--r_axa' in c and 'a10a3f92e9--text_textTransform__uppercase--C4ydW' in c)
+    if type_span:
+        entity_type_text = type_span.text.strip().replace('\xa0', ' ')
+        result_dict[f'{prefix}_type'] = entity_type_text
+        # printer(f"[{prefix.capitalize()}] Тип: {entity_type_text}", kind='info') # Для детальной отладки
+
+    # Имя и ссылка
+    # <div class="a10a3f92e9--name-container--enElO"><a href="/company/7302" ...><span ...>Замоскворечье</span></a></div>
+    name_container = card_soup.find('div', class_='a10a3f92e9--name-container--enElO')
+    if name_container:
+        link_tag = name_container.find('a', class_='a10a3f92e9--link--wbne1')
+        if link_tag:
+            name_span = link_tag.find('span')  # Имя обычно в первом span внутри ссылки
+            if name_span:
+                name = name_span.text.strip().replace('\xa0', ' ')
+                result_dict[f'{prefix}_name'] = name
+                # printer(f"[{prefix.capitalize()}] Имя: {name}", kind='info')
+
+            href = link_tag.get('href')
+            if href:
+                full_link = f"https://www.cian.ru{href}" if href.startswith('/') else href
+                result_dict[f'{prefix}_link'] = full_link
+                # printer(f"[{prefix.capitalize()}] Ссылка: {full_link}", kind='info')
+
+    # Лейблы (Документы проверены, Рейтинг и т.д.)
+    # <div class="a10a3f92e9--labels--LepFl">...<span class="a10a3f92e9--title--LeqmQ">Документы проверены</span>...</div>
+    labels_container = card_soup.find('div', class_='a10a3f92e9--labels--LepFl')
+    if labels_container:
+        labels = []
+        for title_span in labels_container.find_all('span', class_='a10a3f92e9--title--LeqmQ'):
+            label_text = title_span.text.strip().replace('\xa0', ' ')
+            if label_text:  # Добавляем только непустые лейблы
+                labels.append(label_text)
+
+        if labels:
+            result_dict[f'{prefix}_labels'] = labels
+            # printer(f"[{prefix.capitalize()}] Лейблы: {labels}", kind='info')
+
+
+def get_author_branding_info(soup):
+    """
+    Парсит блок AuthorBrandingAside для извлечения информации об агентстве и риелторе.
+    """
+    try:
+        author_branding_aside = soup.find('div', {'data-name': 'AuthorBrandingAside'})
+        if not author_branding_aside:
+            printer("[Брендинг автора] Блок 'AuthorBrandingAside' не найден.", kind='info')
+            return None
+
+        card_component = author_branding_aside.find('div', {'data-testid': 'AgencyBrandingAsideCard'})
+        if not card_component:
+            printer("[Брендинг автора] Компонент 'AgencyBrandingAsideCard' не найден.", kind='info')
+            return None
+
+        branding_data = {}
+
+        # Информация об агентстве
+        # Ищем основной блок агентства по его уникальному внутреннему контейнеру
+        agency_section_container = card_component.find('div', class_='a10a3f92e9--main--_w7i2')
+        if agency_section_container:
+            _parse_branding_card_details(agency_section_container, 'agency', branding_data)
+        else:
+            printer("[Брендинг автора] Секция агентства (main--_w7i2) не найдена.", kind='info')
+
+        # Информация о риелторе
+        # Ищем блок риелтора по его уникальному внутреннему контейнеру
+        realtor_section_container = card_component.find('div', class_='a10a3f92e9--subcontact--SJ_VG')
+        if realtor_section_container:
+            _parse_branding_card_details(realtor_section_container, 'realtor', branding_data)
+        else:
+            printer("[Брендинг автора] Секция риелтора (subcontact--SJ_VG) не найдена.", kind='info')
+
+        if not branding_data:
+            printer("[Брендинг автора] Не удалось извлечь информацию об агентстве или риелторе.", kind='info')
+            return None
+
+        printer(f"[Брендинг автора] {branding_data}", kind='info')
+        return branding_data
+
+    except Exception as _ex:
+        printer(f'error_get_author_branding_info: Произошла ошибка: {_ex}', kind='error')
+        return None
+
+
+def parse_custom_date_to_datetime(date_str_rus):
+    """
+    Преобразует строку с датой и временем на русском языке
+    (например, "сегодня, 05:58", "вчера, 00:10", "6 май, 09:54")
+    в объект datetime.
+    Возвращает datetime объект или None в случае ошибки.
+    """
+    if not date_str_rus or not isinstance(date_str_rus, str):
+        printer("[Парсинг даты] Получена пустая или не строковая дата.", kind='warning')
+        return None
+
+    now = datetime.now()
+    date_str_rus = date_str_rus.strip().lower()
+    dt_object = None
+
+    # Словарь для месяцев (родительный падеж, как обычно используется в датах)
+    # Ключи в нижнем регистре для унификации
+    month_map_genitive = {
+        "янв": 1, "фев": 2, "мар": 3, "апр": 4, "май": 5, "июн": 6,
+        "июл": 7, "авг": 8, "сен": 9, "окт": 10, "ноя": 11, "дек": 12,
+        # Полные названия на всякий случай, если формат изменится
+        "января": 1, "февраля": 2, "марта": 3, "апреля": 4,
+        "июня": 6, "июля": 7, "августа": 8, "сентября": 9,
+        "октября": 10, "ноября": 11, "декабря": 12
+    }
+    # Для "мая" особый случай, так как "май" (им.п.) и "мая" (род.п.)
+    # Порядок важен, чтобы "мая" не перекрыло "май" если используется startswith
+
+    try:
+        # Пытаемся извлечь время
+        time_match = re.search(r'(\d{1,2}:\d{2})$', date_str_rus)
+        if not time_match:
+            printer(f"[Парсинг даты] Не удалось извлечь время из строки: '{date_str_rus}'", kind='warning')
+            return None
+
+        time_str = time_match.group(1)
+        hours, minutes = map(int, time_str.split(':'))
+
+        if "сегодня" in date_str_rus:
+            dt_object = now.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+        elif "вчера" in date_str_rus:
+            target_date = now - timedelta(days=1)
+            dt_object = target_date.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+        else:
+            # Попытка разобрать дату типа "6 май, 09:54" или "6 мая, 09:54"
+            # Убираем время из строки, чтобы не мешало парсить дату
+            date_part_str = date_str_rus.replace(time_str, '').strip().rstrip(',')
+
+            # Ищем день и месяц
+            # (\d{1,2})\s+([а-я]+) - день, пробел, название месяца буквами
+            date_match = re.match(r'(\d{1,2})\s+([а-я]+)', date_part_str)
+            if date_match:
+                day = int(date_match.group(1))
+                month_name_rus = date_match.group(2)
+                month = None
+
+                # Ищем совпадение в словаре месяцев
+                for k_month, v_month in month_map_genitive.items():
+                    if month_name_rus.startswith(k_month):  # Позволяет "май" для "мая"
+                        month = v_month
+                        break
+
+                if month:
+                    year = now.year  # Предполагаем текущий год
+                    # Проверка: если полученная дата (месяц, день) позже текущей даты в текущем году,
+                    # и это не текущий месяц (т.е. не просто более позднее время в том же месяце),
+                    # то, возможно, это дата прошлого года.
+                    # Это более актуально для дат публикации, чем для "обновлено", но добавим на всякий случай.
+                    # Однако для "обновлено" это редкость. Чаще всего год текущий.
+                    # Для простоты пока оставляем текущий год.
+                    # Если бы это была дата публикации, логика определения года могла бы быть сложнее.
+
+                    dt_object = datetime(year, month, day, hour=hours, minute=minutes, second=0, microsecond=0)
+                else:
+                    printer(
+                        f"[Парсинг даты] Не удалось определить месяц из: '{month_name_rus}' в строке '{date_str_rus}'",
+                        kind='warning')
+            else:
+                printer(f"[Парсинг даты] Не удалось разобрать дату (день и месяц) из строки: '{date_str_rus}'",
+                        kind='warning')
+
+    except ValueError as ve:
+        printer(f"[Парсинг даты] Ошибка значения при преобразовании даты '{date_str_rus}': {ve}", kind='error')
+        return None
+    except Exception as e:
+        printer(f"[Парсинг даты] Общая ошибка при преобразовании даты '{date_str_rus}': {e}", kind='error')
+        return None
+
+    return dt_object
+
+
+def parse_views_stats_to_dict(stats_str):
+    """
+    Разбирает строку статистики просмотров на отдельные числовые значения.
+    Возвращает словарь с ключами на русском или пустой словарь, если ничего не найдено.
+    """
+    parsed_stats = {}
+    if not stats_str or not isinstance(stats_str, str):
+        printer("[Парсинг статистики] Получена пустая или не строковая статистика.", kind='warning')
+        return parsed_stats
+
+    # Общее количество просмотров
+    total_views_match = re.search(r'(\d+)\s+просмотр(?:а|ов)?', stats_str)
+    if total_views_match:
+        try:
+            parsed_stats['всего_просмотров'] = int(total_views_match.group(1))
+        except ValueError:
+            printer(
+                f"[Парсинг статистики] Не удалось преобразовать общее кол-во просмотров в число: '{total_views_match.group(1)}'",
+                kind='warning')
+
+    # Просмотров за сегодня
+    today_views_match = re.search(r'(\d+)\s+за\s+сегодня', stats_str)
+    if today_views_match:
+        try:
+            parsed_stats['просмотров_сегодня'] = int(today_views_match.group(1))
+        except ValueError:
+            printer(
+                f"[Парсинг статистики] Не удалось преобразовать просмотры за сегодня в число: '{today_views_match.group(1)}'",
+                kind='warning')
+
+    # Уникальных просмотров
+    # Учитываем "уникальный" и "уникальных"
+    unique_views_match = re.search(r'(\d+)\s+уникальн(?:ый|ых)', stats_str)
+    if unique_views_match:
+        try:
+            parsed_stats['уникальных_просмотров'] = int(unique_views_match.group(1))
+        except ValueError:
+            printer(
+                f"[Парсинг статистики] Не удалось преобразовать уникальные просмотры в число: '{unique_views_match.group(1)}'",
+                kind='warning')
+
+    return parsed_stats
+
+
+def get_offer_metadata_info(soup):
+    """
+    Парсит блок OfferMetaData для извлечения даты обновления, статистики просмотров,
+    а также добавляет дату обновления в формате datetime и разбирает статистику
+    просмотров на отдельные числовые значения.
+    """
+    try:
+        offer_metadata_block = soup.find('div', {'data-name': 'OfferMetaData'})
+        if not offer_metadata_block:
+            printer("[Метаданные] Блок 'OfferMetaData' не найден.", kind='info')
+            return None
+
+        metadata = {
+            'updated_date': None,
+            'updated_datetime': None,  # Новый ключ для datetime объекта
+            'views_stats': None
+            # Новые ключи для статистики будут добавлены ниже
+        }
+
+        # Дата обновления (текст)
+        updated_div = offer_metadata_block.find('div', {'data-testid': 'metadata-updated-date'})
+        if updated_div:
+            updated_span = updated_div.find('span')
+            if updated_span:
+                updated_text_raw = updated_span.text.strip().replace('\xa0', ' ')
+                if updated_text_raw.lower().startswith('обновлено:'):
+                    metadata['updated_date'] = updated_text_raw[len('обновлено:'):].strip()
+                else:
+                    metadata['updated_date'] = updated_text_raw
+
+                # Преобразование в datetime
+                if metadata['updated_date']:
+                    metadata['updated_datetime'] = parse_custom_date_to_datetime(metadata['updated_date'])
+            else:
+                printer("[Метаданные] Span с датой обновления не найден.", kind='info')
+        else:
+            printer("[Метаданные] Div с датой обновления (metadata-updated-date) не найден.", kind='info')
+
+        # Статистика просмотров (текст)
+        stats_button = offer_metadata_block.find('button', {'data-name': 'OfferStats'})
+        if stats_button:
+            stats_text = stats_button.text.strip().replace('\xa0', ' ')
+            metadata['views_stats'] = ' '.join(stats_text.split())  # Очистка от лишних пробелов
+
+            # Разбор статистики на отдельные значения
+            if metadata['views_stats']:
+                parsed_stats_values = parse_views_stats_to_dict(metadata['views_stats'])
+                metadata.update(parsed_stats_values)  # Добавляем ключи из parsed_stats_values в metadata
+        else:
+            printer("[Метаданные] Кнопка статистики (OfferStats) не найдена.", kind='info')
+
+        # Если ни одно из основных полей не было заполнено (кроме производных)
+        if metadata['updated_date'] is None and metadata['views_stats'] is None:
+            printer("[Метаданные] Не удалось извлечь метаданные объявления (дата и статистика отсутствуют).",
+                    kind='info')
+            return None  # Возвращаем None, если совсем ничего не нашли
+
+        printer(f"[Метаданные] {metadata}", kind='info')
+        return metadata
+
+    except Exception as _ex:
+        printer(f'error_get_offer_metadata_info: Произошла ошибка: {_ex}', kind='error')
+        return None
 
 
 def get_developer_info(soup):
@@ -281,7 +619,7 @@ def get_developer_info(soup):
     # 1. Парсинг блока NewbuildingSpecifications
     newbuilding_specs_block = soup.find('ul', {'data-name': 'NewbuildingSpecifications'})
     if newbuilding_specs_block:
-        printer("[Developer Info] Найден блок NewbuildingSpecifications", kind='info')
+        printer("[Застройщик] Найден блок NewbuildingSpecifications", kind='info')
         temp_newbuilding_data = {}
         for item_li in newbuilding_specs_block.find_all('li', class_='a10a3f92e9--item--E1gcC', recursive=False):
             title_div = item_li.find('div', class_='a10a3f92e9--title--QSQ4B')
@@ -300,15 +638,15 @@ def get_developer_info(soup):
                 temp_newbuilding_data[key] = value
 
         if temp_newbuilding_data:
-            printer(f"[Developer Info] Данные из NewbuildingSpecifications: {temp_newbuilding_data}", kind='info')
+            printer(f"[Застройщик] Данные из NewbuildingSpecifications: {temp_newbuilding_data}", kind='info')
             developer_data.update(temp_newbuilding_data)
     else:
-        printer("[Developer Info] Блок NewbuildingSpecifications не найден", kind='info')
+        printer("[Застройщик] Блок NewbuildingSpecifications не найден", kind='info')
 
     # 2. Парсинг блока DeveloperLayout (данные из него приоритетнее и могут перезаписать/дополнить)
     developer_layout_block = soup.find('div', {'data-name': 'DeveloperLayout'})
     if developer_layout_block:
-        printer("[Developer Info] Найден блок DeveloperLayout", kind='info')
+        printer("[Застройщик] Найден блок DeveloperLayout", kind='info')
         current_developer_layout_data = {}
 
         # Имя застройщика
@@ -342,17 +680,17 @@ def get_developer_info(soup):
                         current_developer_layout_data[key_stat] = value_stat
 
         if current_developer_layout_data:
-            printer(f"[Developer Info] Данные из DeveloperLayout: {current_developer_layout_data}", kind='debug')
+            printer(f"[Застройщик] Данные из DeveloperLayout: {current_developer_layout_data}", kind='info')
             developer_data.update(current_developer_layout_data)
     else:
-        printer("[Developer Info] Блок DeveloperLayout не найден", kind='info')
+        printer("[Застройщик] Блок DeveloperLayout не найден", kind='info')
 
     if not developer_data:
-        printer("[Developer Info] Информация о застройщике не найдена.", kind='info')
+        printer("[Застройщик] Информация о застройщике не найдена.", kind='info')
         return None
 
-    printer(f"[Итоговая информация о застройщике] {developer_data}", kind='info')
-    ic(developer_data)
+    printer(f"[Застройщик] Итоговая информация о застройщике: {developer_data}", kind='info')
+    # ic(developer_data)
     return developer_data
 
 
@@ -361,10 +699,10 @@ def get_rosreestr_info(soup):
     rosreestr_section = soup.find('div', {'data-name': 'RosreestrSection'})
 
     if not rosreestr_section:
-        printer("[Rosreestr Info] Блок RosreestrSection не найден.", kind='info')
+        printer("[Росреестр] Блок RosreestrSection не найден.", kind='info')
         return None
 
-    printer("[Rosreestr Info] Найден блок RosreestrSection", kind='info')
+    printer("[Росреестр] Найден блок RosreestrSection", kind='info')
     items = rosreestr_section.find_all('div', {'data-name': 'NameValueListItem'})
     for item in items:
         dt_tag = item.find('dt', class_='a10a3f92e9--name--_zate')
@@ -380,12 +718,12 @@ def get_rosreestr_info(soup):
                 rosreestr_data[key] = value
 
     if not rosreestr_data:
-        printer("[Rosreestr Info] В блоке RosreestrSection не найдено элементов NameValueListItem с данными.",
+        printer("[Росреестр] В блоке RosreestrSection не найдено элементов NameValueListItem с данными.",
                 kind='info')
         return None
 
-    printer(f"[Информация из Росреестра] {rosreestr_data}", kind='info')
-    ic(rosreestr_data)
+    printer(f"[Росреестр] {rosreestr_data}", kind='info')
+    # ic(rosreestr_data)
     return rosreestr_data
 
 
@@ -394,10 +732,10 @@ def get_agent_info(soup):
     agent_info_block = soup.find('div', {'data-name': 'AgentInfo'})
 
     if not agent_info_block:
-        printer("[Agent Info] Блок AgentInfo не найден.", kind='info')
+        printer("[Агент] Блок AgentInfo не найден.", kind='info')
         return None
 
-    printer("[Agent Info] Найден блок AgentInfo", kind='info')
+    printer("[Агент] Найден блок AgentInfo", kind='info')
 
     # ID или имя автора
     agent_name_link = agent_info_block.find('a', class_='a10a3f92e9--agent-name--SVA8M')
@@ -433,31 +771,11 @@ def get_agent_info(soup):
                     agent_data['Объявлений автора (текст)'] = text_content
 
     if not agent_data:
-        printer("[Agent Info] В блоке AgentInfo не найдено данных.", kind='info')
+        printer("[Агент] В блоке AgentInfo не найдено данных.", kind='info')
         return None
 
-    printer(f"[Информация об авторе объявления] {agent_data}", kind='info')
-    ic(agent_data)
+    printer(f"[Агент] Информация об авторе объявления {agent_data}", kind='info')
     return agent_data
-
-
-# def get_description(soup):
-#     try:
-#         # Извлекаем текст из тега span
-#         target_div = soup.find('div', {'data-id': 'content'})
-#
-#         if target_div:
-#             text_data = target_div.get_text(separator='\n', strip=True)
-#             result = ''.join(line.strip() for line in text_data.split('\n') if line.strip())
-#             result = result.replace('-\t', '<br>- ').replace('.-', '.<br>-')
-#             printer(f"{result=}", kind='info')
-#         else:
-#             printer("[get_description] Не удалось найти указанный div с атрибутом data-id='content'.", kind='error')
-#
-#         return result
-#     except Exception as _ex:
-#         printer(f'error_get_description: {_ex}', kind='error')
-#         return None
 
 
 def get_description(soup):
@@ -497,25 +815,6 @@ def get_description(soup):
         printer(f'error_get_description: {_ex}', kind='error')
         return None
 
-
-# def save_image(image_directory, img_url, number):
-#     img_url = img_url.replace('-2.jpg', '-1.jpg')
-#     t = 0.9
-#     if number % 2 == 0:
-#         t += 0.4
-#     time.sleep(t)
-#     try:
-#         response = requests.get(img_url)
-#         file_name = os.path.split(img_url)[1]
-#         path_to_save = os.path.join(image_directory, file_name)
-#         with open(path_to_save, 'wb') as img_file:
-#             img_file.write(response.content)
-#         printer(f"Изображение сохранено как '{file_name}'", kind='info')
-#
-#     except Exception as _ex:
-#         printer(f'error_save_image: {_ex}', kind='error')
-#
-#     return path_to_save
 
 def save_image(image_directory, img_url, number):
     img_url_modified = img_url.replace('-2.jpg', '-1.jpg')  # Модифицируем URL один раз
@@ -564,14 +863,6 @@ def save_image(image_directory, img_url, number):
         return None
     except IOError as io_err:  # Ошибки при работе с файлами
         printer(f'Ошибка ввода-вывода при сохранении {path_to_save}: {io_err}', kind='error')
-        # Если файл был создан, но не записан, он может остаться пустым или поврежденным.
-        # Можно добавить логику удаления такого файла:
-        # if os.path.exists(path_to_save):
-        # try:
-        # os.remove(path_to_save)
-        # printer(f"Удален частично загруженный файл: {path_to_save}", kind='warning')
-        # except OSError as e_del:
-        # printer(f"Не удалось удалить частично загруженный файл {path_to_save}: {e_del}", kind='error')
         return None
     except Exception as _ex:
         printer(f'Непредвиденная ошибка при обработке {img_url_modified}: {_ex}', kind='error')
@@ -599,4 +890,4 @@ def get_imgages(soup, cian_number):
     except Exception as _ex:
         printer(f'error_get_imgages: {_ex}', kind='error')
 
-    return img_list
+    return [img_list, images]

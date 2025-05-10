@@ -7,9 +7,13 @@ from servise import printer
 from settings import cookies, headers
 from create_cian import create_report_cian
 from PDF_creater import converter
+from dotenv import load_dotenv
+from icecream import ic
+
+load_dotenv()
 
 
-def parse_cian(URL, cookies, headers):
+def main_parser(URL, cookies, headers):
     print()
     printer(f'Обрабатываем страницу {URL}', kind='info')
     cian_number = URL.rstrip('/').split('/')[-1]
@@ -39,11 +43,14 @@ def parse_cian(URL, cookies, headers):
             'metro': get_metro(soup),
             # 'params':get_params(soup),
             'params': get_all_offer_params(soup),
+            'author_branding': get_author_branding_info(soup), # Информация о брендинге автора
+            'offer_metadata': get_offer_metadata_info(soup), # Дата обновления и статистика просмотров
             'developer': get_developer_info(soup),
             'rosreestr': get_rosreestr_info(soup),
             'agent': get_agent_info(soup),
             'description': get_description(soup),
-            'images': get_imgages(soup, cian_number),
+            'images': get_imgages(soup, cian_number)[0],
+            'images_links': get_imgages(soup, cian_number)[1],
         }
 
     else:
@@ -53,18 +60,28 @@ def parse_cian(URL, cookies, headers):
 
     return result, cian_number
 
+def parse_cian(URL, cookies, headers):
+    result, cian_number = main_parser(URL, cookies, headers)
+    page_index, header_index, footer_index = create_report_cian(result, cian_number)
+    # converter(DIRECTORY=output_path)
+    report = converter(
+        page_index=page_index,
+        header_index=header_index,
+        footer_index=footer_index,
+    )
+
+    return report, result
 
 if __name__ == '__main__':
     URLs = [
-        'https://www.cian.ru/sale/flat/312256069/',
-        # 'https://www.cian.ru/sale/flat/316598899/',
-        # 'https://www.cian.ru/sale/flat/312564948/'
+        'https://www.cian.ru/sale/flat/312256069/', # Продается 3-комн. квартира, 86,2 м² в ЖК «Новые Смыслы»
+        'https://www.cian.ru/sale/flat/316598899/',
+        'https://www.cian.ru/sale/flat/312564948/',
+        'https://www.cian.ru/sale/flat/312530669/',
+        'https://www.cian.ru/sale/flat/316237818/',
     ]
 
     for URL in URLs:
-        result, cian_number = parse_cian(URL, cookies, headers)
-        output_path = create_report_cian(result, cian_number)
-        converter(DIRECTORY=output_path)
-
+        parse_cian(URL, cookies, headers)
     print('\nПрограмма завершила работу')
     # time.sleep(5)

@@ -279,43 +279,37 @@
         .data-table tbody tr:first-child td {
             border-top: 1px solid #dee2e6;
         }
+
+        @media print {
+            .page-break-before {
+                page-break-before: always !important;
+                display: block; /* Убедимся, что это блочный элемент */
+                visibility: hidden; /* Можно скрыть, если не нужен видимый отступ */
+                height: 1px; /* Минимальная высота для срабатывания */
+                margin-top: -1px; /* Компенсация высоты, если visibility не используется */
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Шапка с контактами -->
-    <table class="layout-table" style="margin-bottom: 0.8rem; border-bottom: 1px solid #eee !important; padding-bottom: 0.5rem;">
+    <!-- Основная об объявлении -->
+    <table class="layout-table">
         <tr>
-            <td style="width: 30%; vertical-align: center; padding-right: 15px;">
-                <div>
-                    <a href="https://t.me/kriss_real_estate_bot"
-                       class="text-decoration-none text-dark fw-bold">
-                        <img src="E:\py\main\simple_real_estate_bot\html_template\теlegram-48.png"
-                             style="width:24px; vertical-align: middle;">@kriss_real_estate_bot</a>
-                </div>
+            <td style="width: 35%; vertical-align: top; padding-right: 15px;">
+                <div class="small text-muted">Отчёт сформирован автоматически:<br>DATE_TAME_ROW</div>
             </td>
-            <td style="width: 70%; text-align: right; vertical-align: center;">
-                <div class="contact-header">
-                    Риелтор ИМЯ_РЕЕЛТОРА | <a href="tel:ТЕЛЕФОН_РИЕЛТОРА"
-                                              class="text-decoration-none text-dark fw-bold">ТЕЛЕФОН_РИЕЛТОРА</a>
-                    <img src="E:\py\main\simple_real_estate_bot\html_template\whatsapp-48.png"
-                         style="width:24px; vertical-align: middle;">
-                    <img src="E:\py\main\simple_real_estate_bot\html_template\instagram-48.png"
-                         style="width:24px; vertical-align: middle;">
-                    <img src="E:\py\main\simple_real_estate_bot\html_template\теlegram-48.png"
-                         style="width:24px; vertical-align: middle;">
-                    <img src="E:\py\main\simple_real_estate_bot\html_template\vk-48.png"
-                         style="width:24px; vertical-align: middle;">
-                    <img src="E:\py\main\simple_real_estate_bot\html_template\viber-48.png"
-                         style="width:24px; vertical-align: middle;">
-                </div>
+            <td style="width: 25%; vertical-align: top; padding-right: 15px;">
+                <div class="small text-muted">Объявление обновлено:<br>ОБНОВЛЕНО_ROW</div>
+            </td>
+            <td style="width: 40%; vertical-align: top;">
+                <div class="small text-muted">Динамика просмотров объявления:<br>ПРОСМОТРЫ_ROW</div>
             </td>
         </tr>
     </table>
-
     <!-- Основная информация: Название, Адрес, Цена -->
-    <table class="layout-table" style="margin-bottom: 0.8rem;">
+    <table class="layout-table" style="margin-bottom: 0.5rem; margin-top: 0.5rem;"">
         <tr>
             <td style="width: 70%; vertical-align: top; padding-right: 15px;">
                 <div class="title-main fw-bold" style="margin-bottom: 0.25rem;">НАЗВАНИЕ</div>
@@ -335,14 +329,14 @@
     <div class="metro-list">МЕТРО</div>
 
     <!-- Галерея Фотографий -->
-    <table class="layout-table photo-gallery" style="margin-top: 1rem; margin-bottom: 0.5rem;">
+    <table class="layout-table photo-gallery">
         <tr>
             ФОТОГРАФИИ
         </tr>
     </table>
 
     <!-- ДВУХКОЛОНОЧНАЯ ТАБЛИЦА ДЛЯ ДЕТАЛЕЙ КВАРТИРЫ И ДОМА -->
-    <table class="layout-table" style="width: 100%; border-spacing: 0; margin-top: 1rem;">
+    <table class="layout-table" style="width: 100%; border-spacing: 0;">
         <tr>
             <!-- ЛЕВАЯ КОЛОНКА: О КВАРТИРЕ -->
             <td style="width: 50%; vertical-align: top; padding-right: 15px;">
@@ -370,44 +364,49 @@
                 <table class="characteristics-table">
                     ЗАСТРОЙЩИК_ROW
                     КЛАСС_ДОМА_ROW
+                    ТИП_КОМПЛЕКСА_ROW
                     ТИП_ДОМА_ROW
                     СТРОИТЕЛЬНАЯ_СЕРИЯ_ROW
                     КОЛИЧЕСТВО_ЛИФТОВ_ROW
                     ТИП_ПЕРЕКРЫТИЙ_ROW
                     ПАРКОВКА_ROW
                     ПОДЪЕЗДЫ_ROW
+                    МУСОРОПРОВОД_ROW
                     ОТОПЛЕНИЕ_ROW
                     АВАРИЙНОСТЬ_ROW
                     ГАЗОСНАБЖЕНИЕ_ROW
+                    ЗДАЧА_КОМПЛЕКСА_ROW
                 </table>
             </td>
         </tr>
     </table>
     <!-- КОНЕЦ ДВУХКОЛОНОЧНОЙ ТАБЛИЦЫ -->
-    <!--<p style="page-break-before: always;"></p>-->
+    <!-- Детали о застройщике -->
+    О_ЗАСТРОЙЩИКЕ_INFO
+    <!-- Элемент для разрыва страницы --- -->
+    <div class="page-break-before"></div>
     <!-- Описание -->
     <h4 class="section-title fw-bold">Описание</h4>
     <div class="description-text">
-        ОПИСАНИЕ <!-- Ожидается текст с <br> -->
+        ОПИСАНИЕ
     </div>
-
     <!-- Подвал -->
-    <hr>
-    <div class="text-center text-muted footer-contact" style="margin-top: 0.5rem; padding-bottom: 1rem;">
-        <div>
-            Отчёт создан через бот | <a href="https://t.me/kriss_real_estate_bot"
-                                        class="text-decoration-none text-dark fw-bold">Помощник риелтора</a>
-        </div>
-        <div>
-            <img src="E:\py\main\simple_real_estate_bot\downloads\QR_bot.png" style="width:300px;"
-                 alt="Помощник риелтора">
-        </div>
-        <div>
-            <a href="https://t.me/kriss_real_estate_bot"
-               class="text-decoration-none text-dark fw-bold">
-                @kriss_real_estate_bot</a>
-        </div>
-    </div>
+<!--    <hr>-->
+<!--    <div class="text-center text-muted footer-contact" style="margin-top: 0.5rem; padding-bottom: 1rem;">-->
+<!--        <div>-->
+<!--            Отчёт создан через бот | <a href="https://t.me/kriss_real_estate_bot"-->
+<!--                                        class="text-decoration-none text-dark fw-bold">Помощник риелтора</a>-->
+<!--        </div>-->
+<!--        <div>-->
+<!--            <img src="E:\py\main\simple_real_estate_bot\downloads\QR_bot.png" style="width:300px;"-->
+<!--                 alt="Помощник риелтора">-->
+<!--        </div>-->
+<!--        <div>-->
+<!--            <a href="https://t.me/kriss_real_estate_bot"-->
+<!--               class="text-decoration-none text-dark fw-bold">-->
+<!--                @kriss_real_estate_bot</a>-->
+<!--        </div>-->
+<!--    </div>-->
 
 </div> <!-- /container -->
 

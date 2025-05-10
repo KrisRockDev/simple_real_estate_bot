@@ -1,6 +1,9 @@
 import os
 import re  # Для очистки описания от лишних пробелов и замены переносов строк
 import traceback  # Для более детальной информации об ошибке
+from idlelib.replace import replace
+import datetime
+
 from settings import templates_dir_absolute, downloads_dir_absolute
 from dotenv import load_dotenv
 from icecream import ic
@@ -63,6 +66,45 @@ def format_price(price_string):
         return 'Цена не указана'
 
 
+def create_header_and_footer(cian_number):
+    """
+    Создаёт заголовок и подвал для HTML-отчета.
+    """
+    header_template_path = os.path.join(templates_dir_absolute, 'header.html')
+    footer_template_path = os.path.join(templates_dir_absolute, 'footer.html')
+
+    header_index = os.path.join(downloads_dir_absolute, os.path.join(cian_number, 'header_index.html'))
+    footer_index = os.path.join(downloads_dir_absolute, os.path.join(cian_number, 'footer_index.html'))
+
+    replace_list = [
+        ('ИМЯ_РИЕЛТОРА', os.getenv("NAME", "")),
+        ('ТЕЛЕФОН_РИЕЛТОРА', os.getenv("PHONE", "")),
+        ('EMAIL_PLACEHOLDER', os.getenv("EMAIL", "")),
+        ('TELEGRAM_BOT_USERNAME', os.getenv("TELEGRAM_BOT_USERNAME", "")),
+        ('TELEGRAM_BOT_LINK', os.getenv("TELEGRAM_BOT_LINK", ""))
+    ]
+
+    with open(file=header_template_path, mode='r', encoding='utf8') as f:
+        header_html = f.read()
+
+    for i in replace_list:
+        header_html = header_html.replace(i[0], i[1])
+
+    with open(file=header_index, mode='w', encoding='utf8') as f:
+        f.write(header_html)
+
+    with open(file=footer_template_path, mode='r', encoding='utf8') as f:
+        footer_html = f.read()
+
+    for i in replace_list:
+        footer_html = footer_html.replace(i[0], i[1])
+
+    with open(file=footer_index, mode='w', encoding='utf8') as f:
+        f.write(footer_html)
+
+    return header_index, footer_index
+
+
 def create_report_cian(res, cian_number):
     """
     Создает HTML-отчет на основе шаблона cian.html и данных из словаря res.
@@ -72,6 +114,7 @@ def create_report_cian(res, cian_number):
         res (dict): Словарь с данными для заполнения шаблона.
         cian_number (str): Номер объявления Cian, используется для создания пути.
     """
+    header_index, footer_index = create_header_and_footer(cian_number)
     tempfile_path = os.path.join(templates_dir_absolute, 'cian7.html')
 
     # Убедимся, что директория для cian_number существует или создаем ее
@@ -92,14 +135,55 @@ def create_report_cian(res, cian_number):
         offer = res.get('offer') or {}
         metro_list = res.get('metro') or []
         params = res.get('params') or {}
+        author_branding = res.get('author_branding') or {}
+        offer_metadata = res.get('offer_metadata') or {}
         developer = res.get('developer') or {}
-        ic(developer)
+        if 'Отделка' in developer:
+            Dash_square = '''
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-square" viewBox="0 0 16 16">
+              <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+              <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
+            </svg>
+            '''
+            Empty_square = '''
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-square" viewBox="0 0 16 16">
+              <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+            </svg>
+            '''
+            Check_square = '''
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square" viewBox="0 0 16 16">
+              <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+              <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+            </svg>
+            '''
+            otdelka = developer['Отделка'].lower().split(',')
+            otdelka_new = []
+            for i in otdelka:
+                if i == params['Отделка'].lower():
+                    otdelka_new.append(f"{Check_square}{i}")
+                else:
+                    otdelka_new.append(f"{Empty_square}{i}")
+            params['Отделка'] = '<br>'.join(otdelka_new)
+            # params['Отделка'] = developer['Отделка'].lower().replace(', ', '<br>').replace(params['Отделка'].lower(),f"<b>{params['Отделка'].lower()}</b>").capitalize()
+        if 'Парковка' in params and 'Парковка' in developer:
+            if len(params['Парковка']) < len(developer['Парковка']):
+                params['Парковка'] = developer['Парковка']
+        if 'Тип дома' in params and 'Тип дома' in developer:
+            if len(params['Тип дома']) < len(developer['Тип дома']):
+                params['Тип дома'] = developer['Тип дома']
         rosreestr = res.get('rosreestr') or {}
         agent = res.get('agent') or {}
         images = res.get('images') or []
-        # Для description оставляем .get(key, default_value), т.к. если парсер вернет пустую строку,
-        # она должна остаться пустой. Если парсер вернет None, .get() вернет default_value.
         description = res.get('description', 'Описание отсутствует.')
+        # ic(offer)
+        # ic(metro_list)
+        # ic(params)
+        # ic(author_branding)
+        # ic(offer_metadata)
+        # ic(developer)
+        # ic(rosreestr)
+        # ic(agent)
+        # ic(description)
 
         # Форматирование списка метро
         metro_html = ""
@@ -158,11 +242,65 @@ def create_report_cian(res, cian_number):
         # --- Функции для генерации HTML строк для таблицы деталей ---
         # (Эти функции теперь получают словари params или rosreestr, которые гарантированно являются dict)
 
+        def generate_developer_info_row(params_dict):
+            if params_dict != {}:
+                developer_info = params_dict.get('Застройщик', 'н/д')
+                developer_year_info = params_dict.get('Год основания', 'н/д')
+                bilded_info = params_dict.get('Сдано', 'н/д')
+                bilding_info = params_dict.get('Строится', 'н/д')
+
+                return f"""<h4 class="section-title fw-bold">О застройщике</h4>
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="width: 25%;" class="detail-item">
+                                        <div class="label">Застройщик</div>
+                                        <div class="value">{developer_info}</div>
+                                    </td>
+                                    <td style="width: 25%;" class="detail-item">
+                                        <div class="label">Год основания</div>
+                                        <div class="value">{developer_year_info}</div>
+                                    </td>
+                                    <td style="width: 25%;" class="detail-item">
+                                        <div class="label">Сдано</div>
+                                        <div class="value">{bilded_info}</div>
+                                    </td>
+                                    <td style="width: 25%;" class="detail-item">
+                                        <div class="label">Строится</div>
+                                        <div class="value">{bilding_info}</div>
+                                    </td>
+                                </tr>
+                            </table>"""
+            return ''
+
+        def generate_developer_year_row(params_dict):
+            value = params_dict.get('Год основания')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f""" (c {value})"""
+            return ''
+
         def generate_developer_row(params_dict):
             value = params_dict.get('Застройщик')
             if value not in EMPTY_VALUES_FOR_HIDE:
                 return f"""<tr class="detail-item">
                                 <td class="label-cell"><span class="label">Застройщик</span></td>
+                                <td class="value-cell"><span class="value">{value}{generate_developer_year_row(params_dict)}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_data_complex_row(params_dict):
+            value = params_dict.get('Сдача комплекса')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Сдача комплекса</span></td>
+                                <td class="value-cell"><span class="value">{value.replace('Сдача в', '')} г.</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_complex_type_row(params_dict):
+            value = params_dict.get('Тип комплекса')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Тип комплекса</span></td>
                                 <td class="value-cell"><span class="value">{value}</span></td>
                             </tr>"""
             return ''
@@ -177,9 +315,9 @@ def create_report_cian(res, cian_number):
             return ''
 
         def generate_otdelka_row(params_dict):
-            ic(params_dict)
+            # ic(params_dict)
             value = params_dict.get('Отделка')
-            ic(params_dict.get('Отделка'))
+            # ic(params_dict.get('Отделка'))
             if value not in EMPTY_VALUES_FOR_HIDE:
                 return f"""<tr class="detail-item">
                                 <td class="label-cell"><span class="label">Отделка</span></td>
@@ -304,12 +442,21 @@ def create_report_cian(res, cian_number):
                             </tr>"""
             return ''
 
+        def generate_mosquito_net_row(params_dict):
+            value = params_dict.get('Мусоропровод')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Мусоропровод</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
         def generate_elevator_count_row(params_dict):
             value = params_dict.get('Количество лифтов')
             if value not in EMPTY_VALUES_FOR_HIDE:
                 return f"""<tr class="detail-item">
                                 <td class="label-cell"><span class="label">Лифт</span></td>
-                                <td class="value-cell"><span class="value">{value}</span></td>
+                                <td class="value-cell"><span class="value">{value.replace(',', '<br>')}</span></td>
                             </tr>"""
             return ''
 
@@ -327,7 +474,7 @@ def create_report_cian(res, cian_number):
             if value not in EMPTY_VALUES_FOR_HIDE:
                 return f"""<tr class="detail-item">
                                 <td class="label-cell"><span class="label">Парковка</span></td>
-                                <td class="value-cell"><span class="value">{value}</span></td>
+                                <td class="value-cell"><span class="value">{value.replace(',', '<br>')}</span></td>
                             </tr>"""
             return ''
 
@@ -387,9 +534,12 @@ def create_report_cian(res, cian_number):
             return ''
 
         replace_list = [
+            ('DATE_TAME_ROW', datetime.datetime.now().strftime("%d.%m.%Y в %H:%M:%S")),
+            ('ОБНОВЛЕНО_ROW', offer_metadata.get('updated_date', 'Не указано')),
+            ('ПРОСМОТРЫ_ROW', offer_metadata.get('views_stats', 'Не указано')),
             ('ИМЯ_РЕЕЛТОРА', os.getenv("NAME", "Имя не указано")),
             ('ТЕЛЕФОН_РИЕЛТОРА', os.getenv("PHONE", "Телефон не указан")),
-            ('НАЗВАНИЕ', res.get('title', 'Без названия')),
+            ('НАЗВАНИЕ', res.get('title', 'Без названия'). replace('Продается','')),
             ('АДРЕС', res.get('adress', 'Адрес не указан')),
             ('ТИП_ЖИЛЬЯ', params.get('Тип жилья', 'Тип не указан')),
             ('СТОИМОСТЬ', format_price(res.get('price', 'Цена не указана'))),
@@ -421,6 +571,7 @@ def create_report_cian(res, cian_number):
             ('СТРОИТЕЛЬНАЯ_СЕРИЯ_ROW', generate_building_series_row(params)),
             ('КОЛИЧЕСТВО_ЛИФТОВ_ROW', generate_elevator_count_row(params)),
             ('ПОДЪЕЗДЫ_ROW', generate_entrances_row(params)),
+            ('МУСОРОПРОВОД_ROW', generate_mosquito_net_row(params)),
             ('ПАРКОВКА_ROW', generate_parking_row(params)),
             ('ОТОПЛЕНИЕ_ROW', generate_heating_row(params)),
             ('АВАРИЙНОСТЬ_ROW', generate_emergency_status_row(params)),
@@ -428,8 +579,9 @@ def create_report_cian(res, cian_number):
 
             ('ЗАСТРОЙЩИК_ROW', generate_developer_row(developer)),
             ('КЛАСС_ДОМА_ROW', generate_class_row(developer)),
-            # ('ОТДЕЛКА_ROW', generate_otdelka_row(developer)),
-
+            ('ЗДАЧА_КОМПЛЕКСА_ROW', generate_data_complex_row(developer)),
+            ('ТИП_КОМПЛЕКСА_ROW', generate_complex_type_row(developer)),
+            ('О_ЗАСТРОЙЩИКЕ_INFO', generate_developer_info_row(developer)),
         ]
 
         for placeholder, value in replace_list:
@@ -439,7 +591,7 @@ def create_report_cian(res, cian_number):
             f.write(template)
         print(f"Отчет успешно создан и сохранен в: {output_path}")
 
-        return output_path
+        return output_path, header_index, footer_index
 
     except FileNotFoundError:
         print(f"Ошибка: Шаблон не найден по пути {tempfile_path}")
