@@ -63,18 +63,22 @@ MAX_MESSAGE_LENGTH = 4096
 
 
 def escape_md(text: str) -> str:
-    """
+    r"""
     Экранирует специальные символы Markdown V1 для aiogram.
     Важно: `\` экранируется первым, чтобы не заэкранировать уже добавленные \.
     """
     if not isinstance(text, str):
         text = str(text)
+    # Порядок важен: сначала экранируем сам обратный слеш
     text = text.replace('\\', '\\\\')
+    # Затем остальные символы
     text = text.replace('*', r'\*')
     text = text.replace('_', r'\_')
-    text = text.replace('`', r'\`')
+    text = text.replace('`', r'\`') # Здесь r'\`' означает "литеральный обратный слеш, за которым следует обратный апостроф"
     text = text.replace('[', r'\[')
     text = text.replace(']', r'\]')
+    # Для MarkdownV1 также могут быть важны: '(', ')', '{', '}', '.', '!', '-', '+'
+    # Но ваш набор уже покрывает основные.
     return text
 
 

@@ -1,7 +1,6 @@
 import os
 import re  # Для очистки описания от лишних пробелов и замены переносов строк
 import traceback  # Для более детальной информации об ошибке
-from idlelib.replace import replace
 import datetime
 
 from settings import templates_dir_absolute, downloads_dir_absolute
