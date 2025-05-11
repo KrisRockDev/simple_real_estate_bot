@@ -1,7 +1,11 @@
-users.txt
-
-films_list.txt
-
 description.md
+
+description.py
+
+requirements.py
+
+.env
+
+README_RU.md
 
 downloads/

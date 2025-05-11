@@ -3,6 +3,7 @@ import os
 import pdfkit
 from dotenv import load_dotenv
 from settings import DEBUG
+from servise import printer
 from icecream import ic
 from settings import downloads_dir_absolute
 
@@ -41,25 +42,24 @@ def converter(page_index, header_index, footer_index):
     }
 
     try:
-        # print(f'Приступаю к созданию PDF)
-        # RESULT_PDF = page_index[:-4] + 'pdf'
         report_title = f'kriss_real_estate_bot_{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}.pdf'
         RESULT_PDF = os.path.join(os.path.split(page_index)[0], report_title)
-        if DEBUG:
+        if DEBUG: # Режим отладки windows 11
             config = pdfkit.configuration(wkhtmltopdf=r'c:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
-        else:
+        else: # Рабочий режим в linux
             config = pdfkit.configuration(wkhtmltopdf=r'/usr/bin/wkhtmltopdf')
         pdfkit.from_file(page_index, RESULT_PDF, configuration=config, options=options)
 
         # os.startfile(HTML_FILE) # Запускает шаблон HTML header-файла
-        # os.remove(HTML_HEADER)  # Удаляет шаблон HTML header-файла
-        # os.remove(HTML_FILE)  # Удаляет шаблон HTML файла
-        os.startfile(RESULT_PDF)  # Запускать итоговый PDF
-        print(f'Завершено к создание PDF')
+        os.remove(page_index)  # Удаляет шаблон HTML-файла
+        os.remove(header_index)  # Удаляет шаблон HTML header-файла
+        os.remove(footer_index)  # Удаляет шаблон HTML файла
+        # os.startfile(RESULT_PDF)  # Запускать итоговый PDF
+        printer(f'[converter] Завершено к создание PDF', kind='info')
         return RESULT_PDF
 
     except Exception as _ex:
-        print(_ex)
+        printer(f'[converter] {_ex}', kind='error')
         return None
 
 

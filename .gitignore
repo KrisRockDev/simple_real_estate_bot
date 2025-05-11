@@ -27,8 +27,12 @@ dist/
 
 downloads/
 
-*~
-
 description.md
-films_list.txt
-users.txt
+
+description.py
+
+requirements.py
+
+README_RU.md
+
+*~

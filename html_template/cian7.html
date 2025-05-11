@@ -297,13 +297,13 @@
     <!-- Основная об объявлении -->
     <table class="layout-table">
         <tr>
-            <td style="width: 35%; vertical-align: top; padding-right: 15px;">
-                <div class="small text-muted">Отчёт сформирован автоматически:<br>DATE_TAME_ROW</div>
-            </td>
             <td style="width: 25%; vertical-align: top; padding-right: 15px;">
+                <div class="small text-muted">Отчёт сформирован:<br>DATE_TAME_ROW</div>
+            </td>
+            <td style="width: 30%; vertical-align: top; padding-right: 15px;">
                 <div class="small text-muted">Объявление обновлено:<br>ОБНОВЛЕНО_ROW</div>
             </td>
-            <td style="width: 40%; vertical-align: top;">
+            <td style="width: 45%; vertical-align: top;">
                 <div class="small text-muted">Динамика просмотров объявления:<br>ПРОСМОТРЫ_ROW</div>
             </td>
         </tr>
@@ -313,13 +313,14 @@
         <tr>
             <td style="width: 70%; vertical-align: top; padding-right: 15px;">
                 <div class="title-main fw-bold" style="margin-bottom: 0.25rem;">НАЗВАНИЕ</div>
-                <div class="address text-muted fw-bold">АДРЕС</div>
+<!--                <div class="address text-muted fw-bold">АДРЕС</div>-->
+                <div class="small value">АДРЕС</div>
                 <div class="year-accanto-title small text-muted">Тип жилья: ТИП_ЖИЛЬЯ (ГОД_ПОСТРОЙКИ г.)</div>
 
             </td>
             <td style="width: 30%; text-align: right; vertical-align: top;">
-                <div class="price-main fw-bold" style="margin-bottom: 0.25rem;">СТОИМОСТЬ</div>
-                <div class="text-muted fw-bold" style="margin-bottom: 0.25rem;">ЦЕНА_ЗА_МЕТР</div>
+                <div class="price-main fw-bold" style="margin-bottom: 0.25rem;">СТОИМОСТЬ ₽</div>
+                <div class="text-muted fw-bold" style="margin-bottom: 0.25rem;">ЦЕНА_ЗА_МЕТР ₽/м²</div>
                 <div class="small text-muted">Условия: УСЛОВИЯ_СДЕЛКИ</div>
                 <div class="small text-muted">Ипотека: ИПОТЕКА</div>
             </td>
@@ -351,6 +352,7 @@
                     РЕМОНТ_ROW
                     ОТДЕЛКА_ROW
                     САНУЗЕЛ_ROW
+                    МЕБЕЛЬ_ROW
                     ВИД_ИЗ_ОКОН_ROW
                     СОБСТВЕННИКОВ_ROW
                     ОБРЕМЕНЕНИЯ_ROW
@@ -364,18 +366,18 @@
                 <table class="characteristics-table">
                     ЗАСТРОЙЩИК_ROW
                     КЛАСС_ДОМА_ROW
-                    ТИП_КОМПЛЕКСА_ROW
                     ТИП_ДОМА_ROW
+                    ТИП_КОМПЛЕКСА_ROW
+                    ЗДАЧА_КОМПЛЕКСА_ROW
                     СТРОИТЕЛЬНАЯ_СЕРИЯ_ROW
                     КОЛИЧЕСТВО_ЛИФТОВ_ROW
                     ТИП_ПЕРЕКРЫТИЙ_ROW
                     ПАРКОВКА_ROW
                     ПОДЪЕЗДЫ_ROW
                     МУСОРОПРОВОД_ROW
-                    ОТОПЛЕНИЕ_ROW
                     АВАРИЙНОСТЬ_ROW
+                    ОТОПЛЕНИЕ_ROW
                     ГАЗОСНАБЖЕНИЕ_ROW
-                    ЗДАЧА_КОМПЛЕКСА_ROW
                 </table>
             </td>
         </tr>

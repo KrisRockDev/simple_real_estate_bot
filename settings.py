@@ -66,11 +66,8 @@ os.makedirs(log_dir_absolute, exist_ok=True)
 templates_dir_absolute = os.path.abspath(templates)
 os.makedirs(templates_dir_absolute, exist_ok=True)
 
-# Количество фильмов сохраняемх в папке base_dir (не рекомендуется менее 10 и более 100)
-limit = 10
 
 # Переменная для режима отладки
 # True - запуск бота в режиме отладки для однократного запуска
 # False - запуск бота в режиме реальной работы для периодического парсинга сайта
-# DEBUG = False
-DEBUG = True
+DEBUG = os.getenv("DEBUG")

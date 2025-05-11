@@ -7,9 +7,9 @@ from datetime import datetime
 from icecream import ic
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
-from aiogram.types import FSInputFile, InputMediaPhoto  # InputMediaPhoto не используется в текущей активной части кода
+from aiogram.types import FSInputFile, InputMediaPhoto
 from dotenv import load_dotenv
-from create_cian import format_price  # Теперь это будет вызываться как функция
+from create_cian import format_price
 
 # Предполагается, что эти импорты есть в вашем проекте
 from parser import parse_cian
@@ -69,9 +69,6 @@ def escape_md(text: str) -> str:
     """
     if not isinstance(text, str):
         text = str(text)
-    # Основные символы, которые aiogram обрабатывает как Markdown V1 сущности: *, _, `, [
-    # Также \ как символ экранирования.
-    # ] важен для ссылок [text] и просто как символ.
     text = text.replace('\\', '\\\\')
     text = text.replace('*', r'\*')
     text = text.replace('_', r'\_')
@@ -83,23 +80,24 @@ def escape_md(text: str) -> str:
 
 def format_short_caption(data: dict, url: str) -> str:
     """Формирует короткую подпись для PDF с основной информацией."""
-    if not data:
-        return escape_md("Информация по объявлению отсутствует.")  # Экранируем на всякий случай
+    if not data:  # Если data пустой словарь {} или None
+        return escape_md("Информация по объявлению отсутствует.")
 
     title_orig = data.get('title', "Без заголовка")
-    address_orig = data.get('adress', "Адрес не указан")
+    # ИСПРАВЛЕНО: 'adress' на 'address'
+    address_orig = data.get('address', "Адрес не указан")
     price_val = data.get('price', "не указана")
 
-    # Корректный вызов функции format_price
-    if price_val != "не указана":
-        # Функция format_price из create_cian.py ожидает строку
-        actual_formatted_price = format_price(str(price_val))
+    if price_val != "не указана" and price_val is not None:  # Добавлена проверка на None для цены
+        try:
+            # Функция format_price из create_cian.py ожидает строку
+            actual_formatted_price = format_price(str(price_val))
+        except Exception as e:  # На случай если format_price выбросит исключение
+            logger.error(f"Ошибка форматирования цены '{price_val}': {e}")
+            actual_formatted_price = "ошибка цены"
     else:
-        # Если цена не указана, format_price может вернуть "Цена не указана" или что-то похожее
-        # Либо можно просто использовать "не указана"
         actual_formatted_price = "не указана"
 
-    # Экранируем все динамические части
     title_escaped = escape_md(title_orig)
     address_escaped = escape_md(address_orig)
     price_display_escaped = escape_md(actual_formatted_price)
@@ -113,7 +111,6 @@ def format_short_caption(data: dict, url: str) -> str:
             params_parts_escaped.append(f"Этаж: {escape_md(str(params_data['Этаж']))}")
     params_str_escaped_joined = ", ".join(params_parts_escaped)
 
-    # Формируем части с Markdown-разметкой
     parts_md_version = [
         f"*{title_escaped}*",
         f"📍 {address_escaped}",
@@ -123,52 +120,33 @@ def format_short_caption(data: dict, url: str) -> str:
         parts_md_version.append(f"📏 {params_str_escaped_joined}")
     base_text_md_version = "\n".join(parts_md_version)
 
-    # Формируем ссылки (они всегда с Markdown)
-    # Текст "Подробнее на Циан" не содержит спецсимволов, не требует экранирования. URL тоже.
-    link_part = f"\n🔗 [Подробнее на Циан]({url})"
+    link_part = f"\n🔗 [Подробнее на Циан]({url})"  # Этот линк не используется в текущей логике caption, но оставлен
 
-    bot_username_orig = os.getenv("TELEGRAM_BOT_USERNAME", "kriss_real_estate_bot")  # Рекомендуется имя без @
+    bot_username_orig = os.getenv("TELEGRAM_BOT_USERNAME", "kriss_real_estate_bot")
     bot_link_env = os.getenv("TELEGRAM_BOT_LINK")
-    # ic(bot_username_orig, bot_link_env) # Оставьте для вашей отладки, если нужно
 
     if bot_link_env:
-        # Текст для ссылки: в Markdown V1 внутри квадратных скобок [текст]
-        # необходимо экранировать только символы ']' и '\'.
-        # Символы '_' и '*' не требуют экранирования и будут отображены как есть.
-
-        # Используем имя пользователя как текст ссылки.
-        # Если в TELEGRAM_BOT_USERNAME есть '@', он будет включен в текст ссылки.
-        # Если вы хотите текст ссылки без '@', убедитесь, что TELEGRAM_BOT_USERNAME его не содержит.
         link_text_content = bot_username_orig
-
         escaped_link_text = link_text_content.replace('\\', '\\\\').replace(']', r'\]')
-
-        # Добавляем .strip() к URL на случай, если в .env есть случайные пробелы по краям
         clean_bot_link_env = bot_link_env.strip()
-
-        link_bot = f"\nОтчёт сформирован автоматически при помощи Телеграм бота:\n[{escaped_link_text}]({clean_bot_link_env})"
+        link_bot = f"\n\nОтчёт сформирован автоматически при помощи Телеграм бота: [{escaped_link_text}]({clean_bot_link_env})"
     else:
-        # Если ссылки нет, используем формат @username.
-        # Убедимся, что имя пользователя "чистое" (без '@' в начале, т.к. мы его добавляем).
         clean_username_for_mention = bot_username_orig.lstrip('@')
-        # Имена пользователей в @упоминаниях обычно не требуют Markdown-экранирования, если они валидны.
-        link_bot = f"\nОтчёт сформирован автоматически при помощи Телеграм бота: @{clean_username_for_mention}"
+        link_bot = f"\n\nОтчёт сформирован автоматически при помощи Телеграм бота: @{clean_username_for_mention}"
 
-    caption_links_combined = '' + link_bot
+    caption_links_combined = '' + link_bot  # Сохраняем для расчета длины
     len_links = len(caption_links_combined)
 
-    # Проверяем, помещается ли версия с Markdown
     if len(base_text_md_version) + len_links <= MAX_CAPTION_LENGTH:
         return base_text_md_version + caption_links_combined
     else:
-        # Markdown-версия слишком длинная. Формируем plain text версию для обрезания.
-        # Используем оригинальные (неэкранированные для Markdown) значения, т.к. escape_md будет применен позже ко всему блоку.
+        # Формируем plain text версию для обрезания.
         plain_parts_list = [
             title_orig,
             f"📍 {address_orig}",
-            f"💰 {actual_formatted_price}",  # Используем уже отформатированную цену
+            f"💰 {actual_formatted_price}",
         ]
-        if isinstance(data.get('params'), dict):  # Собираем оригинальные параметры для plain text
+        if isinstance(data.get('params'), dict):
             params_data_orig = data['params']
             params_orig_str_list = []
             if params_data_orig.get('Общая площадь'):
@@ -179,15 +157,13 @@ def format_short_caption(data: dict, url: str) -> str:
                 plain_parts_list.append(f"📏 {', '.join(params_orig_str_list)}")
 
         base_text_plain_joined = "\n".join(plain_parts_list)
-
         available_space_for_plain_text = MAX_CAPTION_LENGTH - len_links - 3  # 3 for "..."
 
-        if available_space_for_plain_text < 10:  # Если места совсем мало
+        if available_space_for_plain_text < 10:
             trimmed_plain_text = "Инфо..."
         else:
             trimmed_plain_text = base_text_plain_joined[:available_space_for_plain_text] + "..."
 
-        # Экранируем всю текстовую часть перед добавлением ссылок
         return escape_md(trimmed_plain_text) + caption_links_combined
 
 
@@ -197,17 +173,22 @@ def format_full_message_text(data: dict, url: str) -> str:
         return escape_md("Не удалось получить подробные данные по объявлению.")
 
     title_orig = data.get('title', "Без заголовка")
-    address_orig = data.get('adress', "Адрес не указан")
+    # ИСПРАВЛЕНО: 'adress' на 'address' (на случай, если используется и здесь, хотя по коду нет)
+    address_orig = data.get('address', "Адрес не указан")
     price_val = data.get('price', "не указана")
 
-    if price_val != "не указана":
-        actual_formatted_price = format_price(str(price_val))
+    if price_val != "не указана" and price_val is not None:
+        try:
+            actual_formatted_price = format_price(str(price_val))
+        except Exception as e:
+            logger.error(f"Ошибка форматирования цены (full_message) '{price_val}': {e}")
+            actual_formatted_price = "ошибка цены"
     else:
         actual_formatted_price = "не указана"
 
     text_parts = [
-        f"*{escape_md(title_orig)}*",  # Экранированный заголовок в Markdown *...*
-        f"🔗 [Открыть на Циан]({url})\n"  # URL обрабатывается Telegram, текст ссылки безопасен
+        f"*{escape_md(title_orig)}*",
+        f"🔗 [Открыть на Циан]({url})\n"
     ]
 
     text_parts.append(f"🏷️ *Цена*: {escape_md(actual_formatted_price)}")
@@ -243,7 +224,6 @@ def format_full_message_text(data: dict, url: str) -> str:
         text_parts.append("")
 
     if data.get('description'):
-        # Описание может содержать HTML <br>, заменяем их на \n ДО экранирования
         description_orig = str(data['description']).replace('<br>', '\n').replace('<br/>', '\n')
         text_parts.append("📝 *Описание:*")
         text_parts.append(escape_md(description_orig))
@@ -291,11 +271,8 @@ def format_full_message_text(data: dict, url: str) -> str:
         text_parts.append("")
 
     full_text = "\n".join(text_parts)
-    if len(full_text) > MAX_MESSAGE_LENGTH:  # Обрезание полного текста (менее критично для Markdown, т.к. он уже сформирован)
-        full_text = full_text[:MAX_MESSAGE_LENGTH - 4] + "\n..."  # Потенциально может сломать, если срез неудачный
-        # Но полный текст обычно длинный, вероятность мала.
-        # Для полной безопасности, здесь тоже нужна логика plain text при обрезании.
-        # Но пока оставим так, т.к. ошибка была с caption.
+    if len(full_text) > MAX_MESSAGE_LENGTH:
+        full_text = full_text[:MAX_MESSAGE_LENGTH - 4] + "\n..."
     return full_text
 
 
@@ -320,7 +297,7 @@ async def process_cian_url(message: types.Message, current_bot: Bot = bot):
         return
 
     processing_msg = await message.answer(
-        f"⏳ Обрабатываю страницу: {escape_md(url)}\nПожалуйста, подождите...")  # URL тоже экранируем для вывода
+        f"⏳ Обрабатываю страницу: {escape_md(url)}\nПожалуйста, подождите...")
 
     try:
         if sys.version_info >= (3, 9):
@@ -329,9 +306,12 @@ async def process_cian_url(message: types.Message, current_bot: Bot = bot):
             loop = asyncio.get_event_loop()
             report_path, result_data = await loop.run_in_executor(None, parse_cian, url, cookies, headers)
 
-        if not result_data:
+        # Добавим логгирование полученных данных для отладки
+        # logger.info(f"Получены данные от парсера для URL {url}: {result_data}")
+        # Раскомментируйте для отладки, если проблема сохранится
+
+        if not result_data:  # result_data может быть None или пустым словарем
             error_text = "⚠️ Не удалось получить данные по объявлению. Возможно, оно было удалено, изменилась структура страницы или возникла проблема с доступом к Циан."
-            # error_text уже безопасен, т.к. не содержит динамических данных и Markdown
             await message.answer(error_text)
             if ADMIN_CHAT_ID and not is_admin_request:
                 await current_bot.send_message(chat_id=ADMIN_CHAT_ID,
@@ -343,13 +323,13 @@ async def process_cian_url(message: types.Message, current_bot: Bot = bot):
         if report_path and os.path.exists(report_path):
             try:
                 pdf_document_for_user = FSInputFile(report_path)
-                await message.answer_document(document=pdf_document_for_user, caption=short_caption,
+                await message.answer_document(document=pdf_document_for_user,
+                                              caption=short_caption,
                                               parse_mode="Markdown")
                 pdf_sent_to_user = True
                 if ADMIN_CHAT_ID and not is_admin_request:
                     pdf_document_for_admin = FSInputFile(report_path)
                     admin_caption = f"Отчет по {escape_md(url)} (запрос от {user_id}):\n{short_caption}"
-                    # Убедимся, что admin_caption не превышает лимит
                     if len(admin_caption) > MAX_CAPTION_LENGTH:
                         admin_caption = admin_caption[:MAX_CAPTION_LENGTH - 3] + "..."
                     await current_bot.send_document(chat_id=ADMIN_CHAT_ID, document=pdf_document_for_admin,
@@ -357,21 +337,20 @@ async def process_cian_url(message: types.Message, current_bot: Bot = bot):
                                                     parse_mode="Markdown")
             except Exception as e_pdf:
                 logger.error(f"Ошибка при отправке PDF ({report_path}) пользователю {user_id}: {e_pdf}")
-                # short_caption уже отформатирован и обрезан безопасно
-                fallback_text_user = f"Не удалось отправить PDF отчет. {short_caption}"
+                fallback_text_user = f"Не удалось отправить PDF отчет. {short_caption}"  # short_caption уже готов
                 await message.answer(fallback_text_user, parse_mode="Markdown")
                 if ADMIN_CHAT_ID and not is_admin_request:
-                    # Здесь short_caption используется как есть, он уже должен быть безопасным
                     admin_error_text = f"Ошибка отправки PDF ({escape_md(report_path)}) для {escape_md(url)} пользователю {user_id}: {escape_md(str(e_pdf))}\nКороткое описание: {short_caption}"
-                    if len(admin_error_text) > MAX_MESSAGE_LENGTH:  # Используем MAX_MESSAGE_LENGTH для текстового сообщения
+                    if len(admin_error_text) > MAX_MESSAGE_LENGTH:
                         admin_error_text = admin_error_text[
-                                           :MAX_MESSAGE_LENGTH - 100] + "..."  # Оставляем место для многоточия и запаса
+                                           :MAX_MESSAGE_LENGTH - 100] + "..."
                     await current_bot.send_message(chat_id=ADMIN_CHAT_ID,
                                                    text=admin_error_text,
                                                    parse_mode="Markdown")
         else:
             logger.warning(f"Файл отчета PDF не найден или не был создан: {report_path} для URL: {url}")
-            await message.answer(short_caption, parse_mode="Markdown")  # short_caption безопасен
+            # Если PDF нет, отправляем только short_caption как текстовое сообщение
+            await message.answer(short_caption, parse_mode="Markdown")
             if ADMIN_CHAT_ID and not is_admin_request:
                 admin_text = f"Отчет по {escape_md(url)} (PDF не найден, запрос от {user_id}):\n{short_caption}"
                 if len(admin_text) > MAX_MESSAGE_LENGTH:
@@ -380,20 +359,48 @@ async def process_cian_url(message: types.Message, current_bot: Bot = bot):
                                                text=admin_text,
                                                parse_mode="Markdown")
 
-        # Закомментированные части кода для full_text и images опущены для краткости,
-        # но к ним тоже должна применяться логика экранирования escape_md.
+        # Закомментированные части кода для full_text и images
+        # full_message = format_full_message_text(result_data, url)
+        # await message.answer(full_message, parse_mode="Markdown", disable_web_page_preview=True)
+        #
+        image_urls = result_data.get('images', [])
+        if image_urls:
+            media_group = []
+            for img_url in image_urls[:10]: # Ограничение на 10 фото в группе
+                try:
+                    # Можно добавить InputMediaPhoto с caption только для первого фото, если нужно
+                    media_group.append(InputMediaPhoto(media=img_url))
+                except Exception as e_img_url:
+                    logger.error(f"Некорректный URL изображения {img_url}: {e_img_url}")
+
+            if media_group:
+                try:
+                    await message.answer_media_group(media=media_group)
+                    if ADMIN_CHAT_ID and not is_admin_request:
+                        # Переотправка медиагруппы админу может быть сложной без локального скачивания
+                        # Проще отправить ссылки или первое фото
+                        await current_bot.send_message(chat_id=ADMIN_CHAT_ID,
+                                                       text=f"Фото для {escape_md(url)} (пользователь {user_id}):\n" + "\n".join(image_urls[:3]))
+                except Exception as e_media:
+                    logger.error(f"Ошибка при отправке медиагруппы для {url} пользователю {user_id}: {e_media}")
+                    await message.answer("Не удалось отправить фотографии.")
+                    if ADMIN_CHAT_ID and not is_admin_request:
+                        await current_bot.send_message(chat_id=ADMIN_CHAT_ID,
+                                                       text=f"Ошибка отправки фото для {escape_md(url)} пользователю {user_id}: {escape_md(str(e_media))}")
 
     except asyncio.CancelledError:
         logger.warning(f"Задача обработки URL {url} для пользователя {user_id} была отменена.")
     except Exception as e:
         logger.exception(f"Критическая ошибка при обработке URL {url} для пользователя {user_id}: {e}")
         error_message_user = "❌ Произошла внутренняя ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже или свяжитесь с администратором, если проблема повторяется."
-        await message.answer(error_message_user)  # Это сообщение не использует Markdown, безопасно
+        await message.answer(error_message_user)
 
         if ADMIN_CHAT_ID and not is_admin_request:
-            # Для сообщения админу экранируем все динамические части
             error_message_admin = f"‼️ Критическая ошибка парсинга {escape_md(url)} для пользователя {user_id}:\nТип: {escape_md(type(e).__name__)}\nСообщение: {escape_md(str(e))}"
-            await current_bot.send_message(chat_id=ADMIN_CHAT_ID, text=error_message_admin[:MAX_MESSAGE_LENGTH - 100])
+            # Ограничиваем длину сообщения для админа
+            if len(error_message_admin) > MAX_MESSAGE_LENGTH:
+                error_message_admin = error_message_admin[:MAX_MESSAGE_LENGTH - 4] + "..."
+            await current_bot.send_message(chat_id=ADMIN_CHAT_ID, text=error_message_admin)
     finally:
         try:
             await current_bot.delete_message(chat_id=message.chat.id, message_id=processing_msg.message_id)

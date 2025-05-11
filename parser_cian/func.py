@@ -108,8 +108,8 @@ def get_price(soup):
         # Находим элемент с атрибутом data-testid="price-amount"
         price_element = soup.find('div', {'data-testid': 'price-amount'})
         # Извлекаем текст из найденного элемента и приводим его в нужный вид
-        result = price_element.text.strip().replace('\xa0', '').replace('&nbsp;', ' ').split('₽/мес.')[0]
-        printer(f"[Цена] {result} ₽/мес.", kind='info')
+        result = price_element.text.strip().replace('\xa0', '').replace('&nbsp;', ' ').split('₽')[0]
+        printer(f"[Цена] {result} ₽", kind='info')
         return result
     except Exception as _ex:
         printer(f'error_get_price: {_ex}', kind='error')
@@ -133,6 +133,8 @@ def get_offer(soup):
                 value = spans[1].text.strip()
                 res_dict[key] = value
         printer(f"[Предложение] {res_dict}", kind='info')
+        if 'Цена за метр' in res_dict:
+            res_dict['Цена за метр'] = res_dict['Цена за метр'].replace(' ₽/м²', '').replace(' ', '')
         return res_dict
     except Exception as _ex:
         printer(f'error_get_offer: {_ex}', kind='error')
@@ -249,6 +251,11 @@ def get_params(soup):
 
         # printer(f"[Параметры] {result=}", kind='info')
         # ic(result)
+
+        if 'Продаётся с\xa0мебелью' in result:
+            result['Продаётся с мебелью'] = result['Продаётся с\xa0мебелью']
+            del result['Продаётся с\xa0мебелью']
+
         return result
     except Exception as _ex:
         printer(f'error_get_params_new: {_ex}', kind='error')

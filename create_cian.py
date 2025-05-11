@@ -329,8 +329,8 @@ def create_report_cian(res, cian_number):
             value = params_dict.get('Общая площадь')
             if value not in EMPTY_VALUES_FOR_HIDE:
                 return f"""<tr class="detail-item">
-                                <td class="label-cell"><span class="label">Общая площадь</span></td>
-                                <td class="value-cell"><span class="value">{value} м²</span></td>
+                                <td class="label-cell"><span class="label">Общая площадь, м²</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
                             </tr>"""
             return ''
 
@@ -338,8 +338,8 @@ def create_report_cian(res, cian_number):
             value = params_dict.get('Жилая площадь')
             if value not in EMPTY_VALUES_FOR_HIDE:
                 return f"""<tr class="detail-item">
-                                <td class="label-cell"><span class="label">Жилая площадь</span></td>
-                                <td class="value-cell"><span class="value">{value} м²</span></td>
+                                <td class="label-cell"><span class="label">Жилая площадь, м²</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
                             </tr>"""
             return ''
 
@@ -347,8 +347,8 @@ def create_report_cian(res, cian_number):
             value = params_dict.get('Площадь кухни')
             if value not in EMPTY_VALUES_FOR_HIDE:
                 return f"""<tr class="detail-item">
-                                <td class="label-cell"><span class="label">Площадь кухни</span></td>
-                                <td class="value-cell"><span class="value">{value} м²</span></td>
+                                <td class="label-cell"><span class="label">Площадь кухни, м²</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
                             </tr>"""
             return ''
 
@@ -356,8 +356,8 @@ def create_report_cian(res, cian_number):
             value = params_dict.get('Высота потолков')
             if value not in EMPTY_VALUES_FOR_HIDE:
                 return f"""<tr class="detail-item">
-                                <td class="label-cell"><span class="label">Высота потолков</span></td>
-                                <td class="value-cell"><span class="value">{value} м</span></td>
+                                <td class="label-cell"><span class="label">Высота потолков, м</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
                             </tr>"""
             return ''
 
@@ -411,6 +411,15 @@ def create_report_cian(res, cian_number):
             if value not in EMPTY_VALUES_FOR_HIDE:
                 return f"""<tr class="detail-item">
                                 <td class="label-cell"><span class="label">Вид из окон</span></td>
+                                <td class="value-cell"><span class="value">{value}</span></td>
+                            </tr>"""
+            return ''
+
+        def generate_furniture_status_row(params_dict):
+            value = params_dict.get('Продаётся с\xa0мебелью')
+            if value not in EMPTY_VALUES_FOR_HIDE:
+                return f"""<tr class="detail-item">
+                                <td class="label-cell"><span class="label">Продаётся с мебелью</span></td>
                                 <td class="value-cell"><span class="value">{value}</span></td>
                             </tr>"""
             return ''
@@ -533,18 +542,20 @@ def create_report_cian(res, cian_number):
                             </tr>"""
             return ''
 
+
+
         replace_list = [
             ('DATE_TAME_ROW', datetime.datetime.now().strftime("%d.%m.%Y в %H:%M:%S")),
             ('ОБНОВЛЕНО_ROW', offer_metadata.get('updated_date', 'Не указано')),
             ('ПРОСМОТРЫ_ROW', offer_metadata.get('views_stats', 'Не указано')),
             ('ИМЯ_РЕЕЛТОРА', os.getenv("NAME", "Имя не указано")),
             ('ТЕЛЕФОН_РИЕЛТОРА', os.getenv("PHONE", "Телефон не указан")),
-            ('НАЗВАНИЕ', res.get('title', 'Без названия'). replace('Продается','')),
+            ('НАЗВАНИЕ', res.get('title', 'Без названия').replace('Продается', '')),
             ('АДРЕС', res.get('adress', 'Адрес не указан')),
             ('ТИП_ЖИЛЬЯ', params.get('Тип жилья', 'Тип не указан')),
             ('СТОИМОСТЬ', format_price(res.get('price', 'Цена не указана'))),
             ('МЕТРО', metro_html),
-            ('ЦЕНА_ЗА_МЕТР', offer.get('Цена за метр', 'Не указано')),
+            ('ЦЕНА_ЗА_МЕТР', format_price(offer.get('Цена за метр', 'Не указано'))),
             ('УСЛОВИЯ_СДЕЛКИ', (offer.get('Условия сделки') or params.get('Дом') or 'Не указано').capitalize()),
             ('ИПОТЕКА', offer.get('Ипотека', 'Не указано')),
             ('ФОТОГРАФИИ', images_html),
@@ -564,6 +575,7 @@ def create_report_cian(res, cian_number):
             ('ВИД_ИЗ_ОКОН_ROW', generate_window_view_row(params)),
             ('СОБСТВЕННИКОВ_ROW', generate_saler_status_row(rosreestr)),
             ('ОБРЕМЕНЕНИЯ_ROW', generate_peoples_status_row(rosreestr)),
+            ('МЕБЕЛЬ_ROW', generate_furniture_status_row(params)),  # Продаётся с мебелью
             ('КАДАСТРОВЫЙ_НОМЕР_ROW', generate_kadaster_status_row(rosreestr)),
 
             ('ТИП_ДОМА_ROW', generate_house_type_row(params)),

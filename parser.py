@@ -9,12 +9,14 @@ from create_cian import create_report_cian
 from PDF_creater import converter
 from dotenv import load_dotenv
 from icecream import ic
+import asyncio
+from save_to_json import json_converter
+from send_file import send_file_to_telegram
 
 load_dotenv()
 
 
 def main_parser(URL, cookies, headers):
-    print()
     printer(f'Обрабатываем страницу {URL}', kind='info')
     cian_number = URL.rstrip('/').split('/')[-1]
     # print(f"{cian_number=}")
@@ -63,25 +65,44 @@ def main_parser(URL, cookies, headers):
 def parse_cian(URL, cookies, headers):
     result, cian_number = main_parser(URL, cookies, headers)
     page_index, header_index, footer_index = create_report_cian(result, cian_number)
-    # converter(DIRECTORY=output_path)
     report = converter(
         page_index=page_index,
         header_index=header_index,
         footer_index=footer_index,
     )
 
+    result['URL'] = URL
+    result['cian_number'] = cian_number
+
+    json_result = json_converter(
+        data_item=result,
+        report_path=report,
+    )
+    try:
+        if not os.path.exists(json_result):
+            printer(f"Error: File not found at {json_result}", kind='error')
+        else:
+            printer(f"[parse_cian] send JSON file: {json_result} with caption: '{URL}'", kind='info')
+            send_result = asyncio.run(send_file_to_telegram(json_result, URL))
+            os.remove(json_result)
+            # print(f"Telegram API Response:")
+            # print(send_result)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
     return report, result
 
 if __name__ == '__main__':
     URLs = [
-        'https://www.cian.ru/sale/flat/312256069/', # Продается 3-комн. квартира, 86,2 м² в ЖК «Новые Смыслы»
-        'https://www.cian.ru/sale/flat/316598899/',
+        # 'https://www.cian.ru/sale/flat/312256069/', # Продается 3-комн. квартира, 86,2 м² в ЖК «Новые Смыслы»
+        # 'https://www.cian.ru/sale/flat/316598899/',
         'https://www.cian.ru/sale/flat/312564948/',
-        'https://www.cian.ru/sale/flat/312530669/',
-        'https://www.cian.ru/sale/flat/316237818/',
+        # 'https://www.cian.ru/sale/flat/312530669/',
+        # 'https://www.cian.ru/sale/flat/316237818/',
     ]
 
     for URL in URLs:
         parse_cian(URL, cookies, headers)
-    print('\nПрограмма завершила работу')
+    print()
+    printer('[parse_cian] Программа завершила работу', kind='info')
     # time.sleep(5)
