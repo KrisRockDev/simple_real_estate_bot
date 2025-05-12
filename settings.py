@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 
 cookies = {
     '_CIAN_GK': 'cc74a8c2-c6fc-484f-8dd6-29a3524b39d4',
@@ -57,15 +58,17 @@ users_dir_absolute = os.path.abspath(users_dir)
 downloads_dir_absolute = os.path.abspath(downloads_dir)
 os.makedirs(downloads_dir_absolute, exist_ok=True)
 
-
 # директория для логов
 log_dir_absolute = os.path.abspath(log_dir)
 os.makedirs(log_dir_absolute, exist_ok=True)
 
-
 templates_dir_absolute = os.path.abspath(templates)
 os.makedirs(templates_dir_absolute, exist_ok=True)
 
+
+
+# Загружаем переменные окружения
+load_dotenv()
 
 # Переменная для режима отладки
 # True - запуск бота в режиме отладки для однократного запуска

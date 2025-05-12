@@ -1,8 +1,13 @@
-from settings import DEBUG, log_dir_absolute
+from settings import log_dir_absolute
 import datetime
 import os
+from dotenv import load_dotenv
+
+# Загружаем переменные окружения
+load_dotenv()
+
 def printer(message, kind='info'):
-    if DEBUG:
+    if os.getenv("DEBUG"):
         print(f'[{datetime.datetime.now()}]\t[{kind.upper()}]\t{message}')
     else:
         if kind != 'info':

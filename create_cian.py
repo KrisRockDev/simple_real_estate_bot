@@ -2,7 +2,7 @@ import os
 import re  # Для очистки описания от лишних пробелов и замены переносов строк
 import traceback  # Для более детальной информации об ошибке
 import datetime
-
+from servise import printer
 from settings import templates_dir_absolute, downloads_dir_absolute
 from dotenv import load_dotenv
 from icecream import ic
@@ -205,11 +205,21 @@ def create_report_cian(res, cian_number):
             # Отображаем до 3х картинок
             images_to_display = images[:3]
             for i, img_path in enumerate(images_to_display):
-                img_src = f"file:///{img_path.replace(os.sep, '/')}"
-                images_html_parts.append(f'''
-                        <td style="padding: 0.5rem; text-align: center;">
-                          <img src="{img_src}" style="width:280px;" alt="Фото {i + 1}">
-                        </td>''')
+                if img_path:
+                    try:
+                        img_src = f"file:///{img_path.replace(os.sep, '/')}"
+                        images_html_parts.append(f'''
+                                <td style="padding: 0.5rem; text-align: center;">
+                                  <img src="{img_src}" style="width:280px;" alt="Фото {i + 1}">
+                                </td>''')
+                    except Exception as e:
+                        printer(f"[create_report_cian] Ошибка обработки пути изображения '{img_path}' в отчете: {e}", kind='error')
+                else:
+                    # Что делать, если изображение не скачалось?
+                    # Можно пропустить, можно добавить плейсхолдер в отчет
+                    printer("[create_report_cian] Пропуск отсутствующего изображения (None) при создании отчета.", kind='info')
+                    # Например, добавить пустую строку или сообщение об ошибке в HTML/PDF
+                    # html_content += "<p><i>Изображение не загружено</i></p>"
             # Если картинок меньше 3, и мы хотим занимать все 3 колонки (например, для выравнивания)
             # можно добавить пустые <td>. Но текущий HTML этого не требует явно.
             # while len(images_html_parts) < 3 and len(images_html_parts) > 0:

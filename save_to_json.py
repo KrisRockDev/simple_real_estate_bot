@@ -1,6 +1,7 @@
 import json
 import os
-import datetime # <-- Добавлен импорт datetime
+import datetime
+from servise import printer
 
 # Функция-обработчик для объектов datetime
 def datetime_converter(o):
@@ -15,12 +16,12 @@ def json_converter(data_item: dict, report_path: str):
     """
     Сохраняет данные в JSON файл
     """
-    print(f"Получены данные для сохранения: {type(data_item)}") # Добавим лог для типа data_item
+    # printer(f"[json_converter] Получены данные для сохранения: {type(data_item)}", kind='info') # Добавим лог для типа data_item
     if not isinstance(data_item, dict):
-        print("Ошибка: Входные данные (data_item) должны быть словарем.")
+        printer("[json_converter] Ошибка: Входные данные (data_item) должны быть словарем.", kind='error')
         return False
     if not report_path or not isinstance(report_path, str):
-        print("Ошибка: Некорректный путь к отчету (report_path).")
+        printer("[json_converter] Ошибка: Некорректный путь к отчету (report_path).", kind='error')
         return False
 
     # Более надежный способ получить имя файла без расширения и добавить .json
@@ -31,20 +32,20 @@ def json_converter(data_item: dict, report_path: str):
         with open(json_filename, 'w', encoding='utf-8') as f:
             # Используем default=datetime_converter для обработки datetime объектов
             json.dump(data_item, f, ensure_ascii=False, indent=4, default=datetime_converter)
-        print(f"Данные успешно сохранены в файл: {json_filename}")
+        printer(f"[json_converter] Данные успешно сохранены в файл: {json_filename}", kind='info')
         return json_filename # Возвращаем True в случае успеха
     except IOError as e:
-        print(f"Ошибка при записи данных в файл {json_filename}: {e}")
+        printer(f"[json_converter] Ошибка при записи данных в файл {json_filename}: {e}", kind='error')
         return False
     except TypeError as e:
-        print(f"Ошибка сериализации данных в JSON: {e}")
+        printer(f"[json_converter] Ошибка сериализации данных в JSON: {e}", kind='error')
         # Попытка удалить частично записанный файл, если он существует
         if os.path.exists(json_filename):
             try:
                 os.remove(json_filename)
-                print(f"Частично записанный файл {json_filename} удален.")
+                printer(f"[json_converter] Частично записанный файл {json_filename} удален.", kind='info')
             except OSError as remove_err:
-                print(f"Не удалось удалить частично записанный файл {json_filename}: {remove_err}")
+                printer(f"[json_converter] Не удалось удалить частично записанный файл {json_filename}: {remove_err}", kind='error')
         return False
 
 
@@ -80,6 +81,6 @@ if __name__ == '__main__':
     report_path = r'E:\py\main\simple_real_estate_bot\downloads\test.pdf'
     success = json_converter(data_item, report_path)
     if success:
-        print(f"Тестовая обработка завершена успешно. Файл создан.")
+        printer(f"[if __name__ == '__main__':] Тестовая обработка завершена успешно. Файл создан.", kind='info')
     else:
-        print(f"Тестовая обработка завершилась с ошибкой.")
+        printer(f"[if __name__ == '__main__':] Тестовая обработка завершилась с ошибкой.", kind='error')
