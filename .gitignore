@@ -25,6 +25,8 @@ build/
 dist/
 *.egg-info/
 
+logs/
+
 downloads/
 
 description.md

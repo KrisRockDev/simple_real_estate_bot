@@ -366,31 +366,31 @@ async def process_cian_url(message: types.Message, current_bot: Bot = bot):
         # Закомментированные части кода для full_text и images
         # full_message = format_full_message_text(result_data, url)
         # await message.answer(full_message, parse_mode="Markdown", disable_web_page_preview=True)
-        #
-        image_urls = result_data.get('images', [])
-        if image_urls:
-            media_group = []
-            for img_url in image_urls[:10]: # Ограничение на 10 фото в группе
-                try:
-                    # Можно добавить InputMediaPhoto с caption только для первого фото, если нужно
-                    media_group.append(InputMediaPhoto(media=img_url))
-                except Exception as e_img_url:
-                    logger.error(f"Некорректный URL изображения {img_url}: {e_img_url}")
 
-            if media_group:
-                try:
-                    await message.answer_media_group(media=media_group)
-                    if ADMIN_CHAT_ID and not is_admin_request:
-                        # Переотправка медиагруппы админу может быть сложной без локального скачивания
-                        # Проще отправить ссылки или первое фото
-                        await current_bot.send_message(chat_id=ADMIN_CHAT_ID,
-                                                       text=f"Фото для {escape_md(url)} (пользователь {user_id}):\n" + "\n".join(image_urls[:3]))
-                except Exception as e_media:
-                    logger.error(f"Ошибка при отправке медиагруппы для {url} пользователю {user_id}: {e_media}")
-                    await message.answer("Не удалось отправить фотографии.")
-                    if ADMIN_CHAT_ID and not is_admin_request:
-                        await current_bot.send_message(chat_id=ADMIN_CHAT_ID,
-                                                       text=f"Ошибка отправки фото для {escape_md(url)} пользователю {user_id}: {escape_md(str(e_media))}")
+        # image_urls = result_data.get('images', [])
+        # if image_urls:
+        #     media_group = []
+        #     for img_url in image_urls[:10]: # Ограничение на 10 фото в группе
+        #         try:
+        #             # Можно добавить InputMediaPhoto с caption только для первого фото, если нужно
+        #             media_group.append(InputMediaPhoto(media=img_url))
+        #         except Exception as e_img_url:
+        #             logger.error(f"Некорректный URL изображения {img_url}: {e_img_url}")
+        #
+        #     if media_group:
+        #         try:
+        #             await message.answer_media_group(media=media_group)
+        #             if ADMIN_CHAT_ID and not is_admin_request:
+        #                 # Переотправка медиагруппы админу может быть сложной без локального скачивания
+        #                 # Проще отправить ссылки или первое фото
+        #                 await current_bot.send_message(chat_id=ADMIN_CHAT_ID,
+        #                                                text=f"Фото для {escape_md(url)} (пользователь {user_id}):\n" + "\n".join(image_urls[:3]))
+        #         except Exception as e_media:
+        #             logger.error(f"Ошибка при отправке медиагруппы для {url} пользователю {user_id}: {e_media}")
+        #             await message.answer("Не удалось отправить фотографии.")
+        #             if ADMIN_CHAT_ID and not is_admin_request:
+        #                 await current_bot.send_message(chat_id=ADMIN_CHAT_ID,
+        #                                                text=f"Ошибка отправки фото для {escape_md(url)} пользователю {user_id}: {escape_md(str(e_media))}")
 
     except asyncio.CancelledError:
         logger.warning(f"Задача обработки URL {url} для пользователя {user_id} была отменена.")

@@ -44,18 +44,20 @@ def converter(page_index, header_index, footer_index):
     try:
         report_title = f'kriss_real_estate_bot_{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}.pdf'
         RESULT_PDF = os.path.join(os.path.split(page_index)[0], report_title)
-        if os.getenv("DEBAG"): # Режим отладки windows 11
+        debag = os.getenv("DEBUG")
+        printer(f'[converter] Режим отладки: {debag}', kind='info')
+        if debag: # Режим отладки windows 11
             config = pdfkit.configuration(wkhtmltopdf=r'c:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
         else: # Рабочий режим в linux
             config = pdfkit.configuration(wkhtmltopdf=r'/usr/bin/wkhtmltopdf')
         pdfkit.from_file(page_index, RESULT_PDF, configuration=config, options=options)
 
         # os.startfile(HTML_FILE) # Запускает шаблон HTML header-файла
-        os.remove(page_index)  # Удаляет шаблон HTML-файла
-        os.remove(header_index)  # Удаляет шаблон HTML header-файла
-        os.remove(footer_index)  # Удаляет шаблон HTML файла
-        # os.startfile(RESULT_PDF)  # Запускать итоговый PDF
-        printer(f'[converter] Завершено к создание PDF', kind='info')
+        # os.remove(page_index)  # Удаляет шаблон HTML-файла
+        # os.remove(header_index)  # Удаляет шаблон HTML header-файла
+        # os.remove(footer_index)  # Удаляет шаблон HTML файла
+        os.startfile(RESULT_PDF)  # Запускать итоговый PDF
+        printer(f'[converter] Завершено создание PDF файла: {RESULT_PDF}', kind='info')
         return RESULT_PDF
 
     except Exception as _ex:
