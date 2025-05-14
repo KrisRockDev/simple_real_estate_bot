@@ -56,7 +56,7 @@ def converter(page_index, header_index, footer_index):
         # os.remove(page_index)  # Удаляет шаблон HTML-файла
         # os.remove(header_index)  # Удаляет шаблон HTML header-файла
         # os.remove(footer_index)  # Удаляет шаблон HTML файла
-        os.startfile(RESULT_PDF)  # Запускать итоговый PDF
+        # os.startfile(RESULT_PDF)  # Запускать итоговый PDF
         printer(f'[converter] Завершено создание PDF файла: {RESULT_PDF}', kind='info')
         return RESULT_PDF
 
