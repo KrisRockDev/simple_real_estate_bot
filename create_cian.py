@@ -59,7 +59,7 @@ def format_price(price_string):
             return price_string
         except Exception as e:
             # Обработка других возможных ошибок
-            print(f"Не удалось отформатировать цену '{price_string}': {e}")
+            printer(f"[format_price] error: Не удалось отформатировать цену '{price_string}': {e}", kind='error')
             return price_string
     else:
         return 'Цена не указана'
@@ -610,19 +610,19 @@ def create_report_cian(res, cian_number):
 
         with open(file=output_path, mode='w', encoding='utf8') as f:
             f.write(template)
-        print(f"Отчет успешно создан и сохранен в: {output_path}")
+        printer(f"[create_cian] Отчет успешно создан и сохранен в: {output_path}", kind='info')
 
         return output_path, header_index, footer_index
 
     except FileNotFoundError:
-        print(f"Ошибка: Шаблон не найден по пути {tempfile_path}")
+        printer(f"[create_cian] Ошибка: Шаблон не найден по пути {tempfile_path}", kind='error')
         return None
     except KeyError as e:
-        print(f"Ошибка: Отсутствует необходимый ключ в словаре 'res': {e}")
+        printer(f"[create_cian] Ошибка: Отсутствует необходимый ключ в словаре 'res': {e}", kind='error')
         traceback.print_exc()
         return None
     except Exception as e:
-        print(f"Произошла непредвиденная ошибка при создании отчета: {e}")
+        printer(f"[create_cian] Произошла непредвиденная ошибка при создании отчета: {e}", kind='error')
         traceback.print_exc()
         return None
 
