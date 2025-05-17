@@ -7,9 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def printer(message, kind='info'):
+    dt = str(datetime.datetime.now()).replace(',', '.')
     if os.getenv("DEBUG", False):
-        print(f'[{datetime.datetime.now()}]\t[{kind.upper()}]\t{message}')
+        print(f'[{dt}]\t[{kind.upper()}]\t{message}')
     else:
         if kind != 'info':
             with open(file=os.path.join(log_dir_absolute, kind+'txt'), mode='a', encoding='utf8') as file:
-                file.write(f'[{datetime.datetime.now()}]\t[{kind.upper()}]\t{message}\n')
+                file.write(f'[{dt}]\t[{kind.upper()}]\t{message}\n')
