@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def printer(message, kind='info'):
-    if os.getenv("DEBUG"):
+    if os.getenv("DEBUG", False):
         print(f'[{datetime.datetime.now()}]\t[{kind.upper()}]\t{message}')
     else:
         if kind != 'info':

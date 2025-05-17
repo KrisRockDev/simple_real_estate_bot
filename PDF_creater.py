@@ -44,7 +44,7 @@ def converter(page_index, header_index, footer_index):
     try:
         report_title = f'kriss_real_estate_bot_{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}.pdf'
         RESULT_PDF = os.path.join(os.path.split(page_index)[0], report_title)
-        debag = os.getenv("DEBUG")
+        debag = os.getenv("DEBUG", False)
         printer(f'[converter] Режим отладки: {debag}', kind='info')
         if debag: # Режим отладки windows 11
             config = pdfkit.configuration(wkhtmltopdf=r'c:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
